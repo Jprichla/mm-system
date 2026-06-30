@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  gestor
+  engenheiro
+  usuario
+  cliente
+}
+
+enum ProjectStatus {
+  ativo
+  revisao
+  encerrado
+}
+
+enum DocumentType {
+  lista_materiais
+  lista_estimativa
+  lista_cabos
+}
+
+enum FileType {
+  imagem
+  pdf
+  dwg
+  rfa
+  outro
+}
+
+model Company {
+  id        String    @id @default(uuid())
+  name      String
+  cnpj      String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users    User[]
+  projects Project[]
+
+  @@map("companies")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         Role      @default(usuario)
+  companyId    String?   @map("company_id")
+  company      Company?  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  materialsCreated       Material[]      @relation("MaterialCreatedBy")
+  projectsCreated        Project[]       @relation("ProjectCreatedBy")
+  documentsCreated       Document[]      @relation("DocumentCreatedBy")
+  typicalDetailsCreated  TypicalDetail[] @relation("TypicalDetailCreatedBy")
+  auditLogs              AuditLog[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  namePt    String    @map("name_pt")
+  nameEn    String?   @map("name_en")
+  nameEs    String?   @map("name_es")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  materials Material[]
+
+  @@map("categories")
+}
+
+model Material {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  codeWarning   String?  @map("code_warning")
+  codeValidated Boolean  @default(false) @map("code_validated")
+  namePt        String   @map("name_pt")
+  nameEn        String?  @map("name_en")
+  nameEs        String?  @map("name_es")
+  descriptionPt String?  @map("description_pt")
+  descriptionEn String?  @map("description_en")
+  descriptionEs String?  @map("description_es")
+  categoryId    String   @map("category_id")
+  category      Category @relation(fields: [categoryId], references: [id])
+
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("MaterialCreatedBy", fields: [createdById], references: [id])
+
+  variants  MaterialVariant[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@map("materials")
+}
+
+model MaterialVariant {
+  id            String   @id @default(uuid())
+  materialId    String   @map("material_id")
+  material      Material @relation(fields: [materialId], references: [id])
+  code          String   @unique
+  codeWarning   String?  @map("code_warning")
+  codeValidated Boolean  @default(false) @map("code_validated")
+  namePt        String   @map("name_pt")
+  nameEn        String?  @map("name_en")
+  nameEs        String?  @map("name_es")
+  unit          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  documentItems        DocumentItem[]
+  typicalDetailComponents TypicalDetailComponent[]
+
+  @@index([materialId])
+  @@index([deletedAt])
+  @@map("material_variants")
+}
+
+model TypicalDetail {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  namePt        String   @map("name_pt")
+  nameEn        String?  @map("name_en")
+  nameEs        String?  @map("name_es")
+  descriptionPt String?  @map("description_pt")
+  descriptionEn String?  @map("description_en")
+  descriptionEs String?  @map("description_es")
+  
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("TypicalDetailCreatedBy", fields: [createdById], references: [id])
+
+  components  TypicalDetailComponent[]
+  attachments FileAttachment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([deletedAt])
+  @@map("typical_details")
+}
+
+model TypicalDetailComponent {
+  id              String          @id @default(uuid())
+  typicalDetailId String          @map("typical_detail_id")
+  typicalDetail   TypicalDetail   @relation(fields: [typicalDetailId], references: [id], onDelete: Cascade)
+  variantId       String          @map("variant_id")
+  variant         MaterialVariant @relation(fields: [variantId], references: [id])
+  quantity        Decimal         @default(1) @db.Decimal(12, 4)
+  lineNumber      Int             @map("line_number")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([typicalDetailId, lineNumber])
+  @@index([variantId])
+  @@map("typical_detail_components")
+}
+
+model FileAttachment {
+  id              String         @id @default(uuid())
+  entityType      String         @map("entity_type") // 'material', 'typical_detail', 'document'
+  entityId        String         @map("entity_id")
+  fileType        FileType       @map("file_type")
+  fileName        String         @map("file_name")
+  filePath        String         @map("file_path")
+  fileSize        Int            @map("file_size")
+  mimeType        String         @map("mime_type")
+  language        String?        // 'pt', 'en', 'es' ou null
+  description     String?
+  isMainImage     Boolean        @default(false) @map("is_main_image")
+  
+  typicalDetailId String?        @map("typical_detail_id")
+  typicalDetail   TypicalDetail? @relation(fields: [typicalDetailId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([typicalDetailId])
+  @@map("file_attachments")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  code        String        @unique
+  name        String
+  description String?
+  status      ProjectStatus @default(ativo)
+  companyId   String?       @map("company_id")
+  company     Company?      @relation(fields: [companyId], references: [id])
+
+  createdById String? @map("created_by_id")
+  createdBy   User? @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+
+  documents Document[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@map("projects")
+}
+
+model Document {
+  id        String       @id @default(uuid())
+  projectId String       @map("project_id")
+  project   Project      @relation(fields: [projectId], references: [id])
+  code      String
+  title     String
+  type      DocumentType
+  revision  String       @default("00")
+
+  createdById String? @map("created_by_id")
+  createdBy   User? @relation("DocumentCreatedBy", fields: [createdById], references: [id])
+
+  items     DocumentItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  deletedAt DateTime?
+
+  @@unique([projectId, code])
+  @@index([projectId])
+  @@index([deletedAt])
+  @@map("documents")
+}
+
+model DocumentItem {
+  id         String          @id @default(uuid())
+  documentId String          @map("document_id")
+  document   Document        @relation(fields: [documentId], references: [id])
+  variantId  String          @map("variant_id")
+  variant    MaterialVariant @relation(fields: [variantId], references: [id])
+  lineNumber Int             @map("line_number")
+  quantity   Decimal         @default(0) @db.Decimal(12, 4)
+  unitPrice  Decimal?        @map("unit_price") @db.Decimal(12, 4)
+  totalPrice Decimal?        @map("total_price") @db.Decimal(12, 4)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([documentId, lineNumber])
+  @@index([variantId])
+  @@map("document_items")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  user       User?    @relation(fields: [userId], references: [id])
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  action     String
+  method     String
+  path       String
+  statusCode Int      @map("status_code")
+  oldData    Json?    @map("old_data")
+  newData    Json?    @map("new_data")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
