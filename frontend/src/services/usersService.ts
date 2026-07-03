@@ -39,3 +39,8 @@ export async function atualizarAcessoUsuario(id: string, payload: { role: Role; 
   const resposta = await api.put<{ mensagem: string; usuario: UsuarioAdmin }>(`/users/${id}/access`, payload);
   return resposta.data;
 }
+
+export async function criarUsuario(payload: { name: string; email: string; password: string; role: Role }) {
+  const resposta = await api.post<{ mensagem: string; usuario: UsuarioAdmin }>('/users', payload);
+  return resposta.data;
+}

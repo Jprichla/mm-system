@@ -4,7 +4,7 @@ import { GenericTable } from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
 import { useAuthStore } from '../store/authStore';
 import type { Role } from '../types';
-import { atualizarAcessoUsuario, listarUsuariosAdmin, type UsuarioAdmin } from '../services/usersService';
+import { atualizarAcessoUsuario, criarUsuario, listarUsuariosAdmin, type UsuarioAdmin } from '../services/usersService';
 
 const ROLES: Role[] = ['admin', 'gestor', 'engenheiro', 'usuario', 'cliente'];
 
@@ -20,6 +20,9 @@ export default function AdminUsersAccessPage() {
   const [rolesEditados, setRolesEditados] = useState<Record<string, Role>>({});
   const [salvandoId, setSalvandoId] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [criando, setCriando] = useState(false);
+  const [novoUsuario, setNovoUsuario] = useState({ name: '', email: '', password: '', role: 'usuario' as Role });
 
   const carregar = async () => {
     setCarregando(true);
@@ -112,14 +115,70 @@ export default function AdminUsersAccessPage() {
     [rolesEditados, salvandoId, t, usuarioLogado?.id],
   );
 
+  const handleCriarUsuario = async () => {
+    if (!novoUsuario.name || !novoUsuario.email || !novoUsuario.password) {
+      mostrarToast('erro', 'Preencha todos os campos.');
+      return;
+    }
+    setCriando(true);
+    try {
+      await criarUsuario(novoUsuario);
+      mostrarToast('sucesso', 'Usuário criado com sucesso!');
+      setNovoUsuario({ name: '', email: '', password: '', role: 'usuario' });
+      setMostrarForm(false);
+      await carregar();
+    } catch (erro: any) {
+      mostrarToast('erro', erro?.response?.data?.mensagem ?? 'Erro ao criar usuário.');
+    } finally {
+      setCriando(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold">{t('gestaoAcessoUsuarios')}</h2>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {t('gestaoAcessoHint')}
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold">{t('gestaoAcessoUsuarios')}</h2>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            {t('gestaoAcessoHint')}
+          </p>
+        </div>
+        <button className="mm-btn-primary" type="button" onClick={() => setMostrarForm(!mostrarForm)}>
+          + Novo Usuário
+        </button>
       </div>
+
+      {mostrarForm && (
+        <div className="mm-card p-4 space-y-3">
+          <h3 className="font-semibold text-base">Novo Usuário</h3>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Nome Completo *</label>
+              <input className="mm-input" placeholder="Nome Completo" value={novoUsuario.name} onChange={(e) => setNovoUsuario({ ...novoUsuario, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Email *</label>
+              <input className="mm-input" placeholder="email@empresa.com" type="email" value={novoUsuario.email} onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Senha *</label>
+              <input className="mm-input" placeholder="Senha" type="password" value={novoUsuario.password} onChange={(e) => setNovoUsuario({ ...novoUsuario, password: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Nível de Acesso</label>
+              <select className="mm-input" value={novoUsuario.role} onChange={(e) => setNovoUsuario({ ...novoUsuario, role: e.target.value as Role })}>
+                {ROLES.map((role) => (<option key={role} value={role}>{t(`role_${role}`)}</option>))}
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button className="mm-btn-primary" type="button" onClick={handleCriarUsuario} disabled={criando}>
+              {criando ? 'Criando...' : 'Criar'}
+            </button>
+            <button className="mm-btn" type="button" onClick={() => setMostrarForm(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
 
       <div className="mm-card flex flex-wrap gap-2 p-3">
         <input
