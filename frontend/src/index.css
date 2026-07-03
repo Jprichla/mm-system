@@ -99,6 +99,7 @@ body {
   border: 1px solid var(--accent);
   background: var(--accent);
   color: #ffffff;
+  border-radius: 8px
 }
 
 .mm-btn-primary:hover {
