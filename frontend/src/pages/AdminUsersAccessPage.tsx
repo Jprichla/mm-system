@@ -172,10 +172,10 @@ export default function AdminUsersAccessPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="mm-btn-primary" type="button" onClick={handleCriarUsuario} disabled={criando}>
+            <button className="mm-btn-primary" style={{minWidth: '100px'}} type="button" onClick={handleCriarUsuario} disabled={criando}>
               {criando ? 'Criando...' : 'Criar'}
             </button>
-            <button className="mm-btn" type="button" onClick={() => setMostrarForm(false)}>Cancelar</button>
+            <button className="mm-btn" style={{minWidth: '100px'}} type="button" onClick={() => setMostrarForm(false)}>Cancelar</button>
           </div>
         </div>
       )}
