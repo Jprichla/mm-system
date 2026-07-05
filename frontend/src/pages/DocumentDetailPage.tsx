@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../contexts/ToastContext';
+import { usePermissoes } from '../hooks/usePermissoes';
 import { adicionarItem, listarItensDocumento, removerItem } from '../services/documentItemsService';
 import { obterDocumento } from '../services/documentsService';
 import { listarMateriais, listarVariantes } from '../services/materialsService';
 import type { Documento, ItemDocumento, VarianteMaterial } from '../types';
 
 export default function DocumentDetailPage() {
+  const { podeEditarItensLista } = usePermissoes();
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -87,7 +89,7 @@ export default function DocumentDetailPage() {
         </select>
         <input className="mm-input" type="number" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
         <input className="mm-input" type="number" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} placeholder={t('precoUnitario')} />
-        <button className="mm-btn mm-btn-primary" type="button" onClick={incluirItem}>{t('adicionarItem')}</button>
+        <button className="mm-btn mm-btn-primary" type="button" onClick={incluirItem} style={{ display: podeEditarItensLista ? undefined : 'none' }}>{t('adicionarItem')}</button>
       </div>
 
       <div className="mm-card overflow-x-auto">
@@ -112,7 +114,7 @@ export default function DocumentDetailPage() {
                 <td className="px-3 py-2">{item.quantity}</td>
                 <td className="px-3 py-2">{item.unitPrice ?? '-'}</td>
                 <td className="px-3 py-2">{item.totalPrice ?? '-'}</td>
-                <td className="px-3 py-2"><button className="mm-btn text-xs" type="button" onClick={() => excluirItem(item.id)}>{t('excluir')}</button></td>
+                <td className="px-3 py-2">{podeEditarItensLista && <button className="mm-btn text-xs" type="button" onClick={() => excluirItem(item.id)}>{t('excluir')}</button>}</td>
               </tr>
             ))}
           </tbody>

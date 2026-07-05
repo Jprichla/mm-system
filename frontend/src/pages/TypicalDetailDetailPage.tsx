@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../contexts/ToastContext';
+import { usePermissoes } from '../hooks/usePermissoes';
 import { obterDetalheTypico } from '../services/typicalDetailsService';
 import type { AnexoArquivo, ComponenteTypico, DetalheTypico } from '../types';
 
@@ -19,6 +20,7 @@ export default function TypicalDetailDetailPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { mostrarToast } = useToast();
+  const { podeEditarDetalheTipico } = usePermissoes();
 
   const [detalhe, setDetalhe] = useState<DetalheTypico | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -75,7 +77,9 @@ export default function TypicalDetailDetailPage() {
           <p className="text-sm opacity-75">{t('codigo')}: <span className="font-mono">{detalhe.code}</span></p>
         </div>
         <div className="flex gap-2">
-          <Link to={`/typical-details/${detalhe.id}/edit`} className="mm-btn mm-btn-primary">{t('editar')}</Link>
+          {podeEditarDetalheTipico && (
+            <Link to={`/typical-details/${detalhe.id}/edit`} className="mm-btn mm-btn-primary">{t('editar')}</Link>
+          )}
           <button className="mm-btn" type="button" onClick={() => navigate('/typical-details')}>{t('voltar')}</button>
         </div>
       </div>

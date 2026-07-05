@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminOnlyRoute } from './components/AdminOnlyRoute';
+import { GestorRoute, EngenheiroRoute } from './components/RoleRoutes';
 import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/LoginPage';
 import { HomePage } from './pages/HomePage';
@@ -27,22 +28,38 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/home" element={<HomePage />} />
+
+          {/* Materiais — leitura pra todos, formulários só gestor+ */}
           <Route path="/materials" element={<MaterialsPage />} />
-          <Route path="/materials/new" element={<MaterialFormPage />} />
           <Route path="/materials/:id/detail" element={<MaterialDetailPage />} />
-          <Route path="/materials/:id/edit" element={<MaterialFormPage />} />
+          <Route element={<GestorRoute />}>
+            <Route path="/materials/new" element={<MaterialFormPage />} />
+            <Route path="/materials/:id/edit" element={<MaterialFormPage />} />
+          </Route>
+
+          {/* Detalhes Típicos — leitura pra todos, formulários só gestor+ */}
           <Route path="/typical-details" element={<TypicalDetailsPage />} />
-          <Route path="/typical-details/new" element={<TypicalDetailFormPage />} />
           <Route path="/typical-details/:id/detail" element={<TypicalDetailDetailPage />} />
-          <Route path="/typical-details/:id/edit" element={<TypicalDetailFormPage />} />
           <Route path="/typical-details/gallery" element={<TypicalDetailsGalleryPage />} />
+          <Route element={<GestorRoute />}>
+            <Route path="/typical-details/new" element={<TypicalDetailFormPage />} />
+            <Route path="/typical-details/:id/edit" element={<TypicalDetailFormPage />} />
+          </Route>
+
+          {/* Documentos */}
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/documents/balance" element={<DocumentsBalancePage />} />
           <Route path="/documents/:id" element={<DocumentDetailPage />} />
+
+          {/* Projetos — leitura pra todos, criar/editar só engenheiro+ */}
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/projects/new" element={<ProjectFormPage />} />
-          <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
           <Route path="/projects/:id/documents" element={<ProjectDocumentsWorkspacePage />} />
+          <Route element={<EngenheiroRoute />}>
+            <Route path="/projects/new" element={<ProjectFormPage />} />
+            <Route path="/projects/:id/edit" element={<ProjectFormPage />} />
+          </Route>
+
+          {/* Admin */}
           <Route element={<AdminOnlyRoute />}>
             <Route path="/admin/users-access" element={<AdminUsersAccessPage />} />
           </Route>
