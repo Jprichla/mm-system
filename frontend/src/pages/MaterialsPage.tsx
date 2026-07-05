@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { GenericTable } from '../components/GenericTable';
 import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
+import { usePermissoes } from '../hooks/usePermissoes';
 import type { Material, VarianteMaterial } from '../types';
 import {
   listarMateriais,
@@ -17,6 +18,7 @@ export function MaterialsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { mostrarToast } = useToast();
+  const { podeCriarMaterial, podeEditarMaterial, podeExcluirMaterial } = usePermissoes();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -107,29 +109,37 @@ export function MaterialsPage() {
             <button className="mm-btn text-xs" onClick={() => navigate(`/materials/${item.id}/detail`)} type="button">
               👁️ {t('verDetalhes')}
             </button>
-            <button className="mm-btn text-xs" onClick={() => navigate(`/materials/${item.id}/edit`)} type="button">
-              {t('editar')}
-            </button>
-            <button className="mm-btn text-xs" onClick={() => abrirVariantes(item)} type="button">
-              {t('variantes')}
-            </button>
-            <button className="mm-btn text-xs" onClick={() => excluirMaterial(item.id)} type="button">
-              {t('excluir')}
-            </button>
+            {podeEditarMaterial && (
+              <button className="mm-btn text-xs" onClick={() => navigate(`/materials/${item.id}/edit`)} type="button">
+                {t('editar')}
+              </button>
+            )}
+            {podeEditarMaterial && (
+              <button className="mm-btn text-xs" onClick={() => abrirVariantes(item)} type="button">
+                {t('variantes')}
+              </button>
+            )}
+            {podeExcluirMaterial && (
+              <button className="mm-btn text-xs" onClick={() => excluirMaterial(item.id)} type="button">
+                {t('excluir')}
+              </button>
+            )}
           </div>
         ),
       },
     ],
-    [navigate, t],
+    [navigate, t, podeEditarMaterial, podeExcluirMaterial],
   );
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-semibold">{t('materiais')}</h2>
-        <button className="mm-btn mm-btn-primary" type="button" onClick={() => navigate('/materials/new')}>
-          {t('novoMaterial')}
-        </button>
+        {podeCriarMaterial && (
+          <button className="mm-btn mm-btn-primary" type="button" onClick={() => navigate('/materials/new')}>
+            {t('novoMaterial')}
+          </button>
+        )}
       </div>
 
       <div className="mm-card flex flex-wrap gap-2 p-3">
