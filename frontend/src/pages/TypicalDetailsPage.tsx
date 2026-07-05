@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { GenericTable } from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
+import { usePermissoes } from '../hooks/usePermissoes';
 import {
   listarDetalhesTypicos,
   removerDetalheTypico,
@@ -13,6 +14,7 @@ const TypicalDetailsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { mostrarToast } = useToast();
+  const { podeCriarDetalheTipico, podeEditarDetalheTipico, podeExcluirDetalheTipico } = usePermissoes();
 
   const [detalhes, setDetalhes] = useState<DetalheTypico[]>([]);
   const [busca, setBusca] = useState('');
@@ -81,25 +83,24 @@ const TypicalDetailsPage: React.FC = () => {
           >
             👁️ {t('verDetalhes') || 'Ver detalhes'}
           </button>
-          <button
-            onClick={() => navigate(`/typical-details/${detalhe.id}/edit`)}
-            className="mm-btn mm-btn-primary"
-            style={{ fontSize: '0.875rem', padding: '4px 12px' }}
-          >
-            {t('editar') || 'Editar'}
-          </button>
-          <button
-            onClick={() => handleExcluir(detalhe.id)}
-            className="mm-btn"
-            style={{
-              fontSize: '0.875rem',
-              padding: '4px 12px',
-              backgroundColor: 'var(--danger)',
-              color: '#fff',
-            }}
-          >
-            {t('excluir') || 'Excluir'}
-          </button>
+          {podeEditarDetalheTipico && (
+            <button
+              onClick={() => navigate(`/typical-details/${detalhe.id}/edit`)}
+              className="mm-btn mm-btn-primary"
+              style={{ fontSize: '0.875rem', padding: '4px 12px' }}
+            >
+              {t('editar') || 'Editar'}
+            </button>
+          )}
+          {podeExcluirDetalheTipico && (
+            <button
+              onClick={() => handleExcluir(detalhe.id)}
+              className="mm-btn"
+              style={{ fontSize: '0.875rem', padding: '4px 12px', backgroundColor: 'var(--danger)', color: '#fff' }}
+            >
+              {t('excluir') || 'Excluir'}
+            </button>
+          )}
         </div>
       ),
     },
@@ -115,12 +116,11 @@ const TypicalDetailsPage: React.FC = () => {
           <button onClick={() => navigate('/typical-details/gallery')} className="mm-btn">
             {t('galeriaDetalhesTypicos') || 'Galeria'}
           </button>
-          <button
-            onClick={() => navigate('/typical-details/new')}
-            className="mm-btn mm-btn-primary"
-          >
-            {t('novoDetalheTypico') || 'Novo Detalhe Típico'}
-          </button>
+          {podeCriarDetalheTipico && (
+            <button onClick={() => navigate('/typical-details/new')} className="mm-btn mm-btn-primary">
+              {t('novoDetalheTypico') || 'Novo Detalhe Típico'}
+            </button>
+          )}
         </div>
       </div>
 
