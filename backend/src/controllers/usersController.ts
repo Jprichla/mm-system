@@ -137,7 +137,7 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
     data: {
       name,
       email,
-      password: senhaHash,
+      passwordHash: senhaHash,
       role: role as Role,
     },
     select: {
