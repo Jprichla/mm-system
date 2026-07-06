@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../contexts/ToastContext';
@@ -39,6 +39,7 @@ export default function TypicalDetailFormPage() {
   const [variantId, setVariantId] = useState('');
   const [quantidade, setQuantidade] = useState('1');
   const [anexoFile, setAnexoFile] = useState<File | null>(null);
+  const anexoInputRef = useRef<HTMLInputElement>(null);
 
   const carregarVariantes = async () => {
     try {
@@ -129,6 +130,7 @@ export default function TypicalDetailFormPage() {
     try {
       await uploadAnexo(id, { file: anexoFile, isMainImage: anexos.length === 0 });
       setAnexoFile(null);
+      if (anexoInputRef.current) anexoInputRef.current.value = '';
       setAnexos(await listarAnexos(id));
       mostrarToast('sucesso', t('anexoEnviado'));
     } catch (_e) {
@@ -221,8 +223,43 @@ export default function TypicalDetailFormPage() {
           <div className="mm-card space-y-3 p-4">
             <h3 className="text-lg font-semibold">{t('anexos')}</h3>
             <div className="flex flex-wrap items-center gap-2">
-              <input type="file" onChange={(e) => setAnexoFile(e.target.files?.[0] ?? null)} />
-              <button className="mm-btn" type="button" onClick={enviarAnexo} disabled={!anexoFile}>{t('uploadArquivo')}</button>
+              <input
+                ref={anexoInputRef}
+                type="file"
+                className="hidden"
+                onChange={(e) => setAnexoFile(e.target.files?.[0] ?? null)}
+              />
+              <button
+                className="mm-btn"
+                type="button"
+                onClick={() => anexoInputRef.current?.click()}
+              >
+                📎 {t('escolherArquivo')}
+              </button>
+
+              {anexoFile && (
+                <span
+                  className="flex items-center gap-2 rounded-full px-3 py-1 text-sm"
+                  style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                >
+                  {anexoFile.name}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAnexoFile(null);
+                      if (anexoInputRef.current) anexoInputRef.current.value = '';
+                    }}
+                    aria-label={t('remover') || 'Remover'}
+                    className="font-bold opacity-70 hover:opacity-100"
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+
+              <button className="mm-btn mm-btn-primary" type="button" onClick={enviarAnexo} disabled={!anexoFile}>
+                ⬆️ {t('uploadArquivo')}
+              </button>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {anexos.map((a) => (
