@@ -1,12 +1,4 @@
-import fs from 'fs';
-import path from 'path';
 import multer from 'multer';
-
-const uploadDir = path.resolve(process.cwd(), 'uploads');
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
 
 const allowedMimeTypes = new Set([
   'image/jpeg',
@@ -19,17 +11,9 @@ const allowedMimeTypes = new Set([
   'application/x-rfa',
 ]);
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
-    const timestamp = Date.now();
-    cb(null, `${base}_${timestamp}${ext}`);
-  },
-});
+// Guarda o arquivo em memória (buffer) — dali ele é enviado direto pro Cloudflare R2.
+// Não gravamos mais nada em disco local: no Railway o filesystem é efêmero e some a cada deploy.
+const storage = multer.memoryStorage();
 
 export const upload = multer({
   storage,
@@ -44,6 +28,3 @@ export const upload = multer({
     cb(new Error('Tipo de arquivo não permitido'));
   },
 });
-
-export const uploadsPublicPath = '/uploads';
-export const uploadsFsPath = uploadDir;

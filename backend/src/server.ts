@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -16,7 +15,7 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 app.use(auditMiddleware);
-app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+// Arquivos de anexos agora ficam no Cloudflare R2 (URLs públicas diretas), não há mais servir estático local aqui.
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', servico: 'MM System Backend', versao: 'fase-1-mvp' });
