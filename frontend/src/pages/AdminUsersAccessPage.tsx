@@ -250,7 +250,7 @@ export default function AdminUsersAccessPage() {
 
       <Modal
         aberto={!!usuarioParaExcluir}
-        titulo={t('confirmarExclusao')}
+        titulo={t('confirmarExclusaoUsuarioTitulo')}
         onFechar={() => setUsuarioParaExcluir(null)}
       >
         <p className="mb-4 text-sm">
