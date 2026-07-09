@@ -32,6 +32,7 @@ export function usePermissoes() {
     podeEditarProjeto: temRole(role, 'engenheiro'),
     podeExcluirProjeto: role === 'admin',
     podeVerProjetos: temRole(role, 'cliente'),
+    podeGerenciarMembrosProjeto: temRole(role, 'gestor'),
 
     // Documentos dentro de projetos
     podeCriarDocumento: temRole(role, 'engenheiro'),

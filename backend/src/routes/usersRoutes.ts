@@ -4,11 +4,11 @@ import { autenticar, autorizar } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.use(autenticar, autorizar('admin'));
+router.use(autenticar);
 
-router.get('/', listarUsuarios);
-router.post('/', criarUsuario);
-router.put('/:id/access', atualizarAcessoUsuario);
-router.delete('/:id', excluirUsuario);
+router.get('/', autorizar('admin', 'gestor'), listarUsuarios);
+router.post('/', autorizar('admin'), criarUsuario);
+router.put('/:id/access', autorizar('admin'), atualizarAcessoUsuario);
+router.delete('/:id', autorizar('admin'), excluirUsuario);
 
 export default router;
