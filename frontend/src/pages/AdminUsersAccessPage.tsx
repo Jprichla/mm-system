@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericTable } from '../components/GenericTable';
+import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
 import { useAuthStore } from '../store/authStore';
 import type { Role } from '../types';
-import { atualizarAcessoUsuario, criarUsuario, listarUsuariosAdmin, type UsuarioAdmin } from '../services/usersService';
+import { atualizarAcessoUsuario, criarUsuario, excluirUsuario, listarUsuariosAdmin, type UsuarioAdmin } from '../services/usersService';
 
 const ROLES: Role[] = ['admin', 'gestor', 'engenheiro', 'usuario', 'cliente'];
 
@@ -23,6 +24,8 @@ export default function AdminUsersAccessPage() {
   const [mostrarForm, setMostrarForm] = useState(false);
   const [criando, setCriando] = useState(false);
   const [novoUsuario, setNovoUsuario] = useState({ name: '', email: '', password: '', role: 'usuario' as Role });
+  const [usuarioParaExcluir, setUsuarioParaExcluir] = useState<UsuarioAdmin | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
 
   const carregar = async () => {
     setCarregando(true);
@@ -70,6 +73,21 @@ export default function AdminUsersAccessPage() {
     }
   };
 
+  const confirmarExclusao = async () => {
+    if (!usuarioParaExcluir) return;
+    setExcluindo(true);
+    try {
+      await excluirUsuario(usuarioParaExcluir.id);
+      mostrarToast('sucesso', t('usuarioExcluidoSucesso'));
+      setUsuarioParaExcluir(null);
+      await carregar();
+    } catch (erro: any) {
+      mostrarToast('erro', erro?.response?.data?.mensagem ?? t('erroPadrao'));
+    } finally {
+      setExcluindo(false);
+    }
+  };
+
   const colunas = useMemo(
     () => [
       { chave: 'name', titulo: t('nome') },
@@ -101,14 +119,25 @@ export default function AdminUsersAccessPage() {
         chave: 'acoes',
         titulo: t('acoes'),
         render: (item: UsuarioAdmin) => (
-          <button
-            className="mm-btn mm-btn-primary text-xs"
-            type="button"
-            onClick={() => salvarRole(item)}
-            disabled={salvandoId === item.id || usuarioLogado?.id === item.id}
-          >
-            {salvandoId === item.id ? t('salvando') : t('salvar')}
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="mm-btn mm-btn-primary text-xs"
+              type="button"
+              onClick={() => salvarRole(item)}
+              disabled={salvandoId === item.id || usuarioLogado?.id === item.id}
+            >
+              {salvandoId === item.id ? t('salvando') : t('salvar')}
+            </button>
+            <button
+              className="mm-btn text-xs"
+              type="button"
+              style={{ borderColor: 'var(--danger, #dc2626)', color: 'var(--danger, #dc2626)' }}
+              onClick={() => setUsuarioParaExcluir(item)}
+              disabled={usuarioLogado?.id === item.id}
+            >
+              🗑️ {t('excluir')}
+            </button>
+          </div>
         ),
       },
     ],
@@ -218,6 +247,30 @@ export default function AdminUsersAccessPage() {
       <div className="rounded-md border p-3 text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
         {t('naoPodeEditarProprioPerfilHint')}
       </div>
+
+      <Modal
+        aberto={!!usuarioParaExcluir}
+        titulo={t('confirmarExclusao')}
+        onFechar={() => setUsuarioParaExcluir(null)}
+      >
+        <p className="mb-4 text-sm">
+          {t('confirmarExclusaoUsuarioTexto', { nome: usuarioParaExcluir?.name ?? '' })}
+        </p>
+        <div className="flex justify-end gap-2">
+          <button className="mm-btn" type="button" onClick={() => setUsuarioParaExcluir(null)} disabled={excluindo}>
+            {t('cancelar')}
+          </button>
+          <button
+            className="mm-btn"
+            type="button"
+            style={{ backgroundColor: 'var(--danger, #dc2626)', color: '#fff', borderColor: 'var(--danger, #dc2626)' }}
+            onClick={confirmarExclusao}
+            disabled={excluindo}
+          >
+            {excluindo ? t('excluindo') : t('excluirDefinitivamente')}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

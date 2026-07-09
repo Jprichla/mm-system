@@ -44,3 +44,8 @@ export async function criarUsuario(payload: { name: string; email: string; passw
   const resposta = await api.post<{ mensagem: string; usuario: UsuarioAdmin }>('/users', payload);
   return resposta.data;
 }
+
+export async function excluirUsuario(id: string) {
+  const resposta = await api.delete<{ mensagem: string }>(`/users/${id}`);
+  return resposta.data;
+}
