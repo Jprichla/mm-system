@@ -109,3 +109,4 @@ cd /home/ubuntu/mm_system/frontend && npm run build
 - O gestor cadastra manualmente os materiais nas 3 línguas (PT/EN/ES).
 - A tradução automática é aplicada somente na interface (labels/textos), não nos dados de materiais.
 - Todos os campos e mensagens do sistema foram organizados para suportar i18n desde o MVP.
+ 
