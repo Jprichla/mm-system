@@ -5,7 +5,7 @@ import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
 import { useAuthStore } from '../store/authStore';
 import type { Role } from '../types';
-import { atualizarAcessoUsuario, criarUsuario, excluirUsuario, listarUsuariosAdmin, type UsuarioAdmin } from '../services/usersService';
+import { atualizarAcessoUsuario, criarUsuario, excluirUsuario, resetarSenhaUsuario, listarUsuariosAdmin, type UsuarioAdmin } from '../services/usersService';
 
 const ROLES: Role[] = ['admin', 'gestor', 'engenheiro', 'usuario', 'cliente'];
 
@@ -23,9 +23,11 @@ export default function AdminUsersAccessPage() {
   const [carregando, setCarregando] = useState(false);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [criando, setCriando] = useState(false);
-  const [novoUsuario, setNovoUsuario] = useState({ name: '', email: '', password: '', role: 'usuario' as Role });
+  const [novoUsuario, setNovoUsuario] = useState({ name: '', email: '', role: 'usuario' as Role });
   const [usuarioParaExcluir, setUsuarioParaExcluir] = useState<UsuarioAdmin | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [resetandoId, setResetandoId] = useState<string | null>(null);
+  const [senhaTemporariaGerada, setSenhaTemporariaGerada] = useState<{ nome: string; senha: string } | null>(null);
 
   const carregar = async () => {
     setCarregando(true);
@@ -88,6 +90,18 @@ export default function AdminUsersAccessPage() {
     }
   };
 
+  const handleResetarSenha = async (usuario: UsuarioAdmin) => {
+    setResetandoId(usuario.id);
+    try {
+      const resposta = await resetarSenhaUsuario(usuario.id);
+      setSenhaTemporariaGerada({ nome: usuario.name, senha: resposta.senhaTemporaria });
+    } catch (erro: any) {
+      mostrarToast('erro', erro?.response?.data?.mensagem ?? t('erroPadrao'));
+    } finally {
+      setResetandoId(null);
+    }
+  };
+
   const colunas = useMemo(
     () => [
       { chave: 'name', titulo: t('nome') },
@@ -131,6 +145,14 @@ export default function AdminUsersAccessPage() {
             <button
               className="mm-btn text-xs"
               type="button"
+              onClick={() => handleResetarSenha(item)}
+              disabled={resetandoId === item.id}
+            >
+              🔑 {resetandoId === item.id ? t('resetando') : t('resetarSenha')}
+            </button>
+            <button
+              className="mm-btn text-xs"
+              type="button"
               style={{ borderColor: 'var(--danger, #dc2626)', color: 'var(--danger, #dc2626)' }}
               onClick={() => setUsuarioParaExcluir(item)}
               disabled={usuarioLogado?.id === item.id}
@@ -141,19 +163,20 @@ export default function AdminUsersAccessPage() {
         ),
       },
     ],
-    [rolesEditados, salvandoId, t, usuarioLogado?.id],
+    [rolesEditados, salvandoId, resetandoId, t, usuarioLogado?.id],
   );
 
   const handleCriarUsuario = async () => {
-    if (!novoUsuario.name || !novoUsuario.email || !novoUsuario.password) {
+    if (!novoUsuario.name || !novoUsuario.email) {
       mostrarToast('erro', 'Preencha todos os campos.');
       return;
     }
     setCriando(true);
     try {
-      await criarUsuario(novoUsuario);
+      const resposta = await criarUsuario(novoUsuario);
       mostrarToast('sucesso', 'Usuário criado com sucesso!');
-      setNovoUsuario({ name: '', email: '', password: '', role: 'usuario' });
+      setSenhaTemporariaGerada({ nome: novoUsuario.name, senha: resposta.senhaTemporaria });
+      setNovoUsuario({ name: '', email: '', role: 'usuario' });
       setMostrarForm(false);
       await carregar();
     } catch (erro: any) {
@@ -190,8 +213,7 @@ export default function AdminUsersAccessPage() {
               <input className="mm-input" placeholder="email@empresa.com" type="email" value={novoUsuario.email} onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Senha *</label>
-              <input className="mm-input" placeholder="Senha" type="password" value={novoUsuario.password} onChange={(e) => setNovoUsuario({ ...novoUsuario, password: e.target.value })} />
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>{t('senhaInicialTemporariaHint')}</label>
             </div>
             <div>
               <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Nível de Acesso</label>
@@ -270,6 +292,35 @@ export default function AdminUsersAccessPage() {
             {excluindo ? t('excluindo') : t('excluirDefinitivamente')}
           </button>
         </div>
+      </Modal>
+
+      <Modal
+        aberto={!!senhaTemporariaGerada}
+        titulo={t('senhaTemporariaGeradaTitulo')}
+        onFechar={() => setSenhaTemporariaGerada(null)}
+      >
+        <p className="mb-3 text-sm">
+          {t('senhaTemporariaGeradaTexto', { nome: senhaTemporariaGerada?.nome ?? '' })}
+        </p>
+        <div
+          className="mb-4 flex items-center justify-between rounded-md border px-3 py-2 font-mono text-lg"
+          style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}
+        >
+          <span>{senhaTemporariaGerada?.senha}</span>
+          <button
+            className="mm-btn text-xs"
+            type="button"
+            onClick={() => {
+              if (senhaTemporariaGerada) navigator.clipboard.writeText(senhaTemporariaGerada.senha);
+              mostrarToast('sucesso', t('senhaCopiada'));
+            }}
+          >
+            📋 {t('copiar')}
+          </button>
+        </div>
+        <button className="mm-btn w-full" type="button" onClick={() => setSenhaTemporariaGerada(null)}>
+          {t('fechado')}
+        </button>
       </Modal>
     </div>
   );

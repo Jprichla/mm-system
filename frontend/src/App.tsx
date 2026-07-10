@@ -19,6 +19,7 @@ import DocumentsPage from './pages/DocumentsPage';
 import DocumentDetailPage from './pages/DocumentDetailPage';
 import DocumentsBalancePage from './pages/DocumentsBalancePage';
 import AdminUsersAccessPage from './pages/AdminUsersAccessPage';
+import { ChangePasswordPage } from './pages/ChangePasswordPage';
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<ProtectedRoute />}>
+        <Route path="/change-password" element={<ChangePasswordPage />} />
+
         <Route element={<AppLayout />}>
           <Route path="/home" element={<HomePage />} />
 
