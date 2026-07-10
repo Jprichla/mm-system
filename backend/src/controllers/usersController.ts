@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Prisma, Role } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { updateUserAccessSchema } from '../utils/validators';
-import { gerarHashSenha } from '../utils/password';
+import { gerarHashSenha, gerarSenhaTemporaria } from '../utils/password';
 
 export async function listarUsuarios(req: Request, res: Response): Promise<void> {
   const page = Number(req.query.page ?? 1);
@@ -118,10 +118,10 @@ export async function atualizarAcessoUsuario(req: Request, res: Response): Promi
 }
 
 export async function criarUsuario(req: Request, res: Response): Promise<void> {
-  const { name, email, password, role } = req.body;
+  const { name, email, role } = req.body;
 
-  if (!name || !email || !password || !role) {
-    res.status(400).json({ mensagem: 'Nome, email, senha e nível de acesso são obrigatórios.' });
+  if (!name || !email || !role) {
+    res.status(400).json({ mensagem: 'Nome, email e nível de acesso são obrigatórios.' });
     return;
   }
 
@@ -131,7 +131,8 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const senhaHash = await gerarHashSenha(password);
+  const senhaTemporaria = gerarSenhaTemporaria();
+  const senhaHash = await gerarHashSenha(senhaTemporaria);
 
   const usuario = await prisma.user.create({
     data: {
@@ -139,6 +140,7 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
       email,
       passwordHash: senhaHash,
       role: role as Role,
+      mustChangePassword: true,
     },
     select: {
       id: true,
@@ -149,7 +151,7 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
     },
   });
 
-  res.status(201).json({ mensagem: 'Usuário criado com sucesso.', usuario });
+  res.status(201).json({ mensagem: 'Usuário criado com sucesso.', usuario, senhaTemporaria });
 }
 
 export async function excluirUsuario(req: Request, res: Response): Promise<void> {
@@ -193,4 +195,33 @@ export async function excluirUsuario(req: Request, res: Response): Promise<void>
   });
 
   res.json({ mensagem: 'Usuário excluído com sucesso.' });
+}
+
+export async function resetarSenhaUsuario(req: Request, res: Response): Promise<void> {
+  const id = String(req.params.id);
+
+  const usuarioExistente = await prisma.user.findFirst({
+    where: { id, deletedAt: null },
+    select: { id: true },
+  });
+
+  if (!usuarioExistente) {
+    res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+    return;
+  }
+
+  const senhaTemporaria = gerarSenhaTemporaria();
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      passwordHash: await gerarHashSenha(senhaTemporaria),
+      mustChangePassword: true,
+    },
+  });
+
+  res.json({
+    mensagem: 'Senha resetada com sucesso. Repasse a senha temporária abaixo ao usuário.',
+    senhaTemporaria,
+  });
 }
