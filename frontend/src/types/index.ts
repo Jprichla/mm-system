@@ -1,514 +1,115 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+export type Role = 'admin' | 'gestor' | 'engenheiro' | 'usuario' | 'cliente';
 
-const resources = {
-  pt: {
-    translation: {
-      appName: 'MM System',
-      login: 'Entrar',
-      email: 'E-mail',
-      senha: 'Senha',
-      sair: 'Sair',
-      home: 'Home',
-      materiais: 'Materiais',
-      projetos: 'Projetos',
-      gestaoAcessos: 'Gestão de Acessos',
-      categoriasGlobais: 'Cadastros Globais',
-      projetosTitulo: 'Projetos',
-      novoMaterial: 'Novo Material',
-      novoProjeto: 'Novo Projeto',
-      trocarSenha: 'Trocar Senha',
-      senhaAtual: 'Senha atual',
-      novaSenha: 'Nova senha',
-      confirmarSenha: 'Confirmar nova senha',
-      trocaSenhaObrigatoriaHint: 'Por segurança, troque sua senha temporária antes de continuar.',
-      senhaMinimoCaracteres: 'A nova senha deve ter ao menos 6 caracteres.',
-      senhasNaoConferem: 'As senhas não conferem.',
-      senhaAlteradaSucesso: 'Senha alterada com sucesso.',
-      resetarSenha: 'Resetar Senha',
-      resetando: 'Resetando...',
-      senhaTemporariaGeradaTitulo: 'Senha temporária gerada',
-      senhaTemporariaGeradaTexto: 'Repasse esta senha para {{nome}}. Ela precisará trocá-la no próximo login.',
-      copiar: 'Copiar',
-      senhaCopiada: 'Senha copiada para a área de transferência.',
-      senhaInicialTemporariaHint: 'Uma senha temporária será gerada automaticamente e exibida após salvar.',
-      membrosDoProjeto: 'Membros do Projeto',
-      membrosDoProjetoHint: 'Usuários e clientes vinculados aqui passam a enxergar este projeto e seus documentos.',
-      buscarUsuario: 'Buscar usuário',
-      usuario: 'Usuário',
-      selecionar: 'Selecionar',
-      adicionar: 'Adicionar',
-      adicionando: 'Adicionando...',
-      removendo: 'Removendo...',
-      membroAdicionadoSucesso: 'Usuário adicionado ao projeto.',
-      membroRemovidoSucesso: 'Usuário removido do projeto.',
-      nenhumMembroProjeto: 'Nenhum usuário vinculado a este projeto ainda.',
-      buscar: 'Buscar',
-      salvar: 'Salvar',
-      cancelar: 'Cancelar',
-      acoes: 'Ações',
-      codigo: 'Código',
-      nome: 'Nome',
-      descricao: 'Descrição',
-      categoria: 'Categoria',
-      variantes: 'Variantes',
-      tema: 'Tema',
-      idioma: 'Idioma',
-      claro: 'Claro',
-      escuro: 'Escuro',
-      avisoCodigo: 'Código fora do padrão esperado, cadastro permitido com alerta.',
-      painelPrincipal: 'Hub Principal',
-      navegacaoRapida: 'Navegação rápida para MVP Fase 1',
-      criar: 'Criar',
-      editar: 'Editar',
-      excluir: 'Excluir',
-      excluindo: 'Excluindo...',
-      excluirDefinitivamente: 'Excluir',
-      confirmarExclusaoUsuarioTitulo: 'Confirmar exclusão',
-      confirmarExclusaoUsuarioTexto: 'Tem certeza que deseja excluir o usuário "{{nome}}"? Ele perderá o acesso ao sistema imediatamente.',
-      usuarioExcluidoSucesso: 'Usuário excluído com sucesso.',
-      listar: 'Listar',
-      nomePt: 'Nome (PT)',
-      nomeEn: 'Nome (EN)',
-      nomeEs: 'Nome (ES)',
-      descricaoPt: 'Descrição (PT)',
-      descricaoEn: 'Descrição (EN)',
-      descricaoEs: 'Descrição (ES)',
-      abaPortugues: 'Português',
-      abaIngles: 'Inglês',
-      abaEspanhol: 'Espanhol',
-      status: 'Status',
-      projetoCriado: 'Projeto criado com sucesso.',
-      materialCriado: 'Material criado com sucesso.',
-      erroPadrao: 'Falha ao processar a solicitação.',
-      semDados: 'Nenhum dado encontrado.',
-      pagina: 'Página',
-      de: 'de',
-      anterior: 'Anterior',
-      proxima: 'Próxima',
-      incluirVariante: 'Incluir Variante',
-      unidade: 'Unidade',
-      fechado: 'Fechar',
-      sucesso: 'Sucesso',
-      erro: 'Erro',
-      confirmarExclusao: 'Confirma a exclusão lógica deste registro?',
-      // Detalhes Típicos
-      detalhesTypicos: 'Detalhes Típicos',
-      detalheTypico: 'Detalhe Típico',
-      novoDetalheTypico: 'Novo Detalhe Típico',
-      nenhumDetalheTypico: 'Nenhum detalhe típico encontrado',
-      componentes: 'Componentes',
-      erroCarregarDetalhesTypicos: 'Erro ao carregar detalhes típicos',
-      detalheTyicoExcluidoSucesso: 'Detalhe típico excluído com sucesso',
-      erroExcluirDetalheTypico: 'Erro ao excluir detalhe típico',
-      // Document Items
-      itensDocumento: 'Itens do Documento',
-      adicionarItem: 'Adicionar Item',
-      quantidade: 'Quantidade',
-      precoUnitario: 'Preço Unitário',
-      precoTotal: 'Preço Total',
-      documentos: 'Documentos',
-      tipoDocumento: 'Tipo',
-      revisao: 'Revisão',
-      detalhar: 'Detalhar',
-      novoDocumento: 'Novo Documento',
-      documentosProjeto: 'Documentos do Projeto',
-      listaMateriais: 'Lista de Materiais',
-      listaEstimativa: 'Lista Estimativa',
-      listaCabos: 'Lista de Cabos',
-      relatorioBalanco: 'Relatório de Balanço',
-      executarBalanco: 'Executar Balanço Comparativo',
-      selecioneListasParaBalance: 'Selecione ao menos 1 lista de cada lado para comparar',
-      selecionados: 'selecionados',
-      itens: 'Itens',
-      preenchaCamposObrigatorios: 'Preencha código e nome do documento',
-      registroExcluido: 'Registro excluído com sucesso',
-      documentosDentroProjetoHint: 'Os documentos agora ficam dentro do ambiente de cada projeto, com abas por tipo e relatório de balanço.',
-      irParaProjetos: 'Ir para Projetos',
-      voltar: 'Voltar',
-      selecionarVariante: 'Selecionar variante',
-      totalGeral: 'Total Geral',
-      salvarComSucesso: 'Registro salvo com sucesso.',
-      anexoEnviado: 'Anexo enviado com sucesso.',
-      anexos: 'Anexos',
-      escolherArquivo: 'Escolher arquivo',
-      remover: 'Remover',
-      uploadArquivo: 'Upload de Arquivo',
-      definirPrincipal: 'Definir principal',
-      galeriaDetalhesTypicos: 'Galeria de Típicos',
-      editarDetalheTypico: 'Editar Detalhe Típico',
-      compararDocumentos: 'Comparar Documentos',
-      balanceEngine: 'Balance Engine',
-      divergencias: 'Divergências',
-      selecioneDoisDocumentos: 'Selecione ao menos 2 documentos para comparar',
-      nenhumBalanceDisponivel: 'Nenhuma comparação disponível',
-      // Material Detail
-      verDetalhes: 'Ver Detalhes',
-      detalhesMaterial: 'Detalhes do Material',
-      informacoesGerais: 'Informações Gerais',
-      dataCriacao: 'Data de Criação',
-      nomes: 'Nomes',
-      descricoes: 'Descrições',
-      nenhumaVariante: 'Nenhuma variante cadastrada',
-      adicionarVariante: 'Adicionar Variante',
-      carregando: 'Carregando',
-      erroCarregar: 'Erro ao carregar dados',
-      detalhesDetalheTypico: 'Detalhes do Detalhe Típico',
-      imagemPrincipal: 'Imagem Principal',
-      semImagem: 'Sem imagem',
-      material: 'Material',
-      variante: 'Variante',
-      nenhumComponente: 'Nenhum componente cadastrado',
-      quantidadeTotal: 'Quantidade Total',
-      galeriaImagens: 'Galeria de Imagens',
-      nenhumAnexo: 'Nenhum anexo',
-      anexosTecnicos: 'Anexos Técnicos',
-      gestaoAcessoUsuarios: 'Gestão de níveis de acesso dos usuários',
-      gestaoAcessoHint: 'Tela exclusiva de administrador para definir o perfil de acesso de cada usuário.',
-      nivelAcesso: 'Nível de Acesso',
-      empresa: 'Empresa',
-      role_admin: 'Administrador',
-      role_gestor: 'Gestor',
-      role_engenheiro: 'Engenheiro',
-      role_usuario: 'Usuário',
-      role_cliente: 'Cliente',
-      acessoAtualizadoSucesso: 'Nível de acesso atualizado com sucesso.',
-      nenhumaAlteracaoRole: 'Nenhuma alteração para salvar.',
-      salvando: 'Salvando...',
-      naoPodeEditarProprioPerfilHint: 'Por segurança, o administrador logado não pode alterar seu próprio perfil por esta tela.',
-    },
-  },
-  en: {
-    translation: {
-      appName: 'MM System',
-      login: 'Sign in',
-      email: 'Email',
-      senha: 'Password',
-      sair: 'Logout',
-      home: 'Home',
-      materiais: 'Materials',
-      projetos: 'Projects',
-      gestaoAcessos: 'Access Management',
-      categoriasGlobais: 'Global Catalogs',
-      projetosTitulo: 'Projects',
-      novoMaterial: 'New Material',
-      novoProjeto: 'New Project',
-      trocarSenha: 'Change Password',
-      senhaAtual: 'Current password',
-      novaSenha: 'New password',
-      confirmarSenha: 'Confirm new password',
-      trocaSenhaObrigatoriaHint: 'For security, change your temporary password before continuing.',
-      senhaMinimoCaracteres: 'The new password must be at least 6 characters.',
-      senhasNaoConferem: 'Passwords do not match.',
-      senhaAlteradaSucesso: 'Password changed successfully.',
-      resetarSenha: 'Reset Password',
-      resetando: 'Resetting...',
-      senhaTemporariaGeradaTitulo: 'Temporary password generated',
-      senhaTemporariaGeradaTexto: 'Share this password with {{nome}}. They will need to change it on next login.',
-      copiar: 'Copy',
-      senhaCopiada: 'Password copied to clipboard.',
-      senhaInicialTemporariaHint: 'A temporary password will be generated automatically and shown after saving.',
-      membrosDoProjeto: 'Project Members',
-      membrosDoProjetoHint: 'Users and clients linked here will be able to see this project and its documents.',
-      buscarUsuario: 'Search user',
-      usuario: 'User',
-      selecionar: 'Select',
-      adicionar: 'Add',
-      adicionando: 'Adding...',
-      removendo: 'Removing...',
-      membroAdicionadoSucesso: 'User added to the project.',
-      membroRemovidoSucesso: 'User removed from the project.',
-      nenhumMembroProjeto: 'No user linked to this project yet.',
-      buscar: 'Search',
-      salvar: 'Save',
-      cancelar: 'Cancel',
-      acoes: 'Actions',
-      codigo: 'Code',
-      nome: 'Name',
-      descricao: 'Description',
-      categoria: 'Category',
-      variantes: 'Variants',
-      tema: 'Theme',
-      idioma: 'Language',
-      claro: 'Light',
-      escuro: 'Dark',
-      avisoCodigo: 'Code outside expected pattern, registration allowed with warning.',
-      painelPrincipal: 'Main Hub',
-      navegacaoRapida: 'Quick navigation for MVP Phase 1',
-      criar: 'Create',
-      editar: 'Edit',
-      excluir: 'Delete',
-      excluindo: 'Deleting...',
-      excluirDefinitivamente: 'Delete',
-      confirmarExclusaoUsuarioTitulo: 'Confirm deletion',
-      confirmarExclusaoUsuarioTexto: 'Are you sure you want to delete the user "{{nome}}"? They will lose access to the system immediately.',
-      usuarioExcluidoSucesso: 'User deleted successfully.',
-      listar: 'List',
-      nomePt: 'Name (PT)',
-      nomeEn: 'Name (EN)',
-      nomeEs: 'Name (ES)',
-      descricaoPt: 'Description (PT)',
-      descricaoEn: 'Description (EN)',
-      descricaoEs: 'Description (ES)',
-      abaPortugues: 'Portuguese',
-      abaIngles: 'English',
-      abaEspanhol: 'Spanish',
-      status: 'Status',
-      projetoCriado: 'Project created successfully.',
-      materialCriado: 'Material created successfully.',
-      erroPadrao: 'Failed to process request.',
-      semDados: 'No data found.',
-      pagina: 'Page',
-      de: 'of',
-      anterior: 'Previous',
-      proxima: 'Next',
-      incluirVariante: 'Add Variant',
-      unidade: 'Unit',
-      fechado: 'Close',
-      sucesso: 'Success',
-      erro: 'Error',
-      confirmarExclusao: 'Confirm logical deletion of this record?',
-      documentos: 'Documents',
-      tipoDocumento: 'Type',
-      revisao: 'Revision',
-      detalhar: 'Details',
-      novoDocumento: 'New Document',
-      documentosProjeto: 'Project Documents',
-      listaMateriais: 'Material List',
-      listaEstimativa: 'Estimate List',
-      listaCabos: 'Cable List',
-      relatorioBalanco: 'Balance Report',
-      executarBalanco: 'Run Comparative Balance',
-      selecioneListasParaBalance: 'Select at least 1 list from each side to compare',
-      selecionados: 'selected',
-      itens: 'Items',
-      preenchaCamposObrigatorios: 'Fill in document code and name',
-      registroExcluido: 'Record deleted successfully',
-      documentosDentroProjetoHint: 'Documents are now inside each project workspace, with tabs by type and balance report.',
-      irParaProjetos: 'Go to Projects',
-      voltar: 'Back',
-      selecionarVariante: 'Select variant',
-      totalGeral: 'Grand Total',
-      salvarComSucesso: 'Record saved successfully.',
-      anexoEnviado: 'Attachment uploaded successfully.',
-      anexos: 'Attachments',
-      escolherArquivo: 'Choose file',
-      remover: 'Remove',
-      uploadArquivo: 'Upload File',
-      definirPrincipal: 'Set as main',
-      galeriaDetalhesTypicos: 'Typical Details Gallery',
-      editarDetalheTypico: 'Edit Typical Detail',
-      compararDocumentos: 'Compare Documents',
-      balanceEngine: 'Balance Engine',
-      divergencias: 'Divergences',
-      selecioneDoisDocumentos: 'Select at least 2 documents to compare',
-      nenhumBalanceDisponivel: 'No comparison available',
-      // Material Detail
-      verDetalhes: 'View Details',
-      detalhesMaterial: 'Material Details',
-      informacoesGerais: 'General Information',
-      dataCriacao: 'Creation Date',
-      nomes: 'Names',
-      descricoes: 'Descriptions',
-      nenhumaVariante: 'No variants registered',
-      adicionarVariante: 'Add Variant',
-      carregando: 'Loading',
-      erroCarregar: 'Error loading data',
-      detalhesDetalheTypico: 'Typical Detail Information',
-      imagemPrincipal: 'Main Image',
-      semImagem: 'No image',
-      material: 'Material',
-      variante: 'Variant',
-      nenhumComponente: 'No components registered',
-      quantidadeTotal: 'Total Quantity',
-      galeriaImagens: 'Image Gallery',
-      nenhumAnexo: 'No attachments',
-      anexosTecnicos: 'Technical Attachments',
-      gestaoAcessoUsuarios: 'User access level management',
-      gestaoAcessoHint: 'Admin-only screen to configure each user access profile.',
-      nivelAcesso: 'Access Level',
-      empresa: 'Company',
-      role_admin: 'Administrator',
-      role_gestor: 'Manager',
-      role_engenheiro: 'Engineer',
-      role_usuario: 'User',
-      role_cliente: 'Client',
-      acessoAtualizadoSucesso: 'Access level updated successfully.',
-      nenhumaAlteracaoRole: 'No changes to save.',
-      salvando: 'Saving...',
-      naoPodeEditarProprioPerfilHint: 'For safety, the logged-in administrator cannot change their own profile on this screen.',
-    },
-  },
-  es: {
-    translation: {
-      appName: 'MM System',
-      login: 'Iniciar sesión',
-      email: 'Correo',
-      senha: 'Contraseña',
-      sair: 'Salir',
-      home: 'Inicio',
-      materiais: 'Materiales',
-      projetos: 'Proyectos',
-      gestaoAcessos: 'Gestión de Accesos',
-      categoriasGlobais: 'Catálogos Globales',
-      projetosTitulo: 'Proyectos',
-      novoMaterial: 'Nuevo Material',
-      novoProjeto: 'Nuevo Proyecto',
-      trocarSenha: 'Cambiar Contraseña',
-      senhaAtual: 'Contraseña actual',
-      novaSenha: 'Nueva contraseña',
-      confirmarSenha: 'Confirmar nueva contraseña',
-      trocaSenhaObrigatoriaHint: 'Por seguridad, cambie su contraseña temporal antes de continuar.',
-      senhaMinimoCaracteres: 'La nueva contraseña debe tener al menos 6 caracteres.',
-      senhasNaoConferem: 'Las contraseñas no coinciden.',
-      senhaAlteradaSucesso: 'Contraseña cambiada con éxito.',
-      resetarSenha: 'Restablecer Contraseña',
-      resetando: 'Restableciendo...',
-      senhaTemporariaGeradaTitulo: 'Contraseña temporal generada',
-      senhaTemporariaGeradaTexto: 'Comparta esta contraseña con {{nome}}. Deberá cambiarla en el próximo inicio de sesión.',
-      copiar: 'Copiar',
-      senhaCopiada: 'Contraseña copiada al portapapeles.',
-      senhaInicialTemporariaHint: 'Se generará automáticamente una contraseña temporal que se mostrará después de guardar.',
-      membrosDoProjeto: 'Miembros del Proyecto',
-      membrosDoProjetoHint: 'Los usuarios y clientes vinculados aquí podrán ver este proyecto y sus documentos.',
-      buscarUsuario: 'Buscar usuario',
-      usuario: 'Usuario',
-      selecionar: 'Seleccionar',
-      adicionar: 'Agregar',
-      adicionando: 'Agregando...',
-      removendo: 'Quitando...',
-      membroAdicionadoSucesso: 'Usuario agregado al proyecto.',
-      membroRemovidoSucesso: 'Usuario eliminado del proyecto.',
-      nenhumMembroProjeto: 'Aún no hay usuarios vinculados a este proyecto.',
-      buscar: 'Buscar',
-      salvar: 'Guardar',
-      cancelar: 'Cancelar',
-      acoes: 'Acciones',
-      codigo: 'Código',
-      nome: 'Nombre',
-      descricao: 'Descripción',
-      categoria: 'Categoría',
-      variantes: 'Variantes',
-      tema: 'Tema',
-      idioma: 'Idioma',
-      claro: 'Claro',
-      escuro: 'Oscuro',
-      avisoCodigo: 'Código fuera del patrón esperado, registro permitido con alerta.',
-      painelPrincipal: 'Hub Principal',
-      navegacaoRapida: 'Navegación rápida para MVP Fase 1',
-      criar: 'Crear',
-      editar: 'Editar',
-      excluir: 'Eliminar',
-      excluindo: 'Eliminando...',
-      excluirDefinitivamente: 'Eliminar',
-      confirmarExclusaoUsuarioTitulo: 'Confirmar eliminación',
-      confirmarExclusaoUsuarioTexto: '¿Está seguro de que desea eliminar al usuario "{{nome}}"? Perderá el acceso al sistema de inmediato.',
-      usuarioExcluidoSucesso: 'Usuario eliminado con éxito.',
-      listar: 'Listar',
-      nomePt: 'Nombre (PT)',
-      nomeEn: 'Nombre (EN)',
-      nomeEs: 'Nombre (ES)',
-      descricaoPt: 'Descripción (PT)',
-      descricaoEn: 'Descripción (EN)',
-      descricaoEs: 'Descripción (ES)',
-      abaPortugues: 'Portugués',
-      abaIngles: 'Inglés',
-      abaEspanhol: 'Español',
-      status: 'Estado',
-      projetoCriado: 'Proyecto creado con éxito.',
-      materialCriado: 'Material creado con éxito.',
-      erroPadrao: 'No se pudo procesar la solicitud.',
-      semDados: 'No se encontraron datos.',
-      pagina: 'Página',
-      de: 'de',
-      anterior: 'Anterior',
-      proxima: 'Siguiente',
-      incluirVariante: 'Agregar Variante',
-      unidade: 'Unidad',
-      fechado: 'Cerrar',
-      sucesso: 'Éxito',
-      erro: 'Error',
-      confirmarExclusao: '¿Confirma la exclusión lógica de este registro?',
-      documentos: 'Documentos',
-      tipoDocumento: 'Tipo',
-      revisao: 'Revisión',
-      detalhar: 'Detalle',
-      novoDocumento: 'Nuevo Documento',
-      documentosProjeto: 'Documentos del Proyecto',
-      listaMateriais: 'Lista de Materiales',
-      listaEstimativa: 'Lista Estimativa',
-      listaCabos: 'Lista de Cables',
-      relatorioBalanco: 'Reporte de Balance',
-      executarBalanco: 'Ejecutar Balance Comparativo',
-      selecioneListasParaBalance: 'Seleccione al menos 1 lista de cada lado para comparar',
-      selecionados: 'seleccionados',
-      itens: 'Ítems',
-      preenchaCamposObrigatorios: 'Complete código y nombre del documento',
-      registroExcluido: 'Registro eliminado con éxito',
-      documentosDentroProjetoHint: 'Los documentos ahora están dentro del entorno de cada proyecto, con pestañas por tipo y reporte de balance.',
-      irParaProjetos: 'Ir a Proyectos',
-      voltar: 'Volver',
-      selecionarVariante: 'Seleccionar variante',
-      totalGeral: 'Total General',
-      salvarComSucesso: 'Registro guardado con éxito.',
-      anexoEnviado: 'Adjunto enviado con éxito.',
-      anexos: 'Adjuntos',
-      escolherArquivo: 'Elegir archivo',
-      remover: 'Quitar',
-      uploadArquivo: 'Subir Archivo',
-      definirPrincipal: 'Definir principal',
-      galeriaDetalhesTypicos: 'Galería de Típicos',
-      editarDetalheTypico: 'Editar Detalle Típico',
-      compararDocumentos: 'Comparar Documentos',
-      balanceEngine: 'Motor de Balance',
-      divergencias: 'Divergencias',
-      selecioneDoisDocumentos: 'Seleccione al menos 2 documentos para comparar',
-      nenhumBalanceDisponivel: 'No hay comparación disponible',
-      // Material Detail
-      verDetalhes: 'Ver Detalles',
-      detalhesMaterial: 'Detalles del Material',
-      informacoesGerais: 'Información General',
-      dataCriacao: 'Fecha de Creación',
-      nomes: 'Nombres',
-      descricoes: 'Descripciones',
-      nenhumaVariante: 'No hay variantes registradas',
-      adicionarVariante: 'Agregar Variante',
-      carregando: 'Cargando',
-      erroCarregar: 'Error al cargar datos',
-      detalhesDetalheTypico: 'Detalles del Detalle Típico',
-      imagemPrincipal: 'Imagen Principal',
-      semImagem: 'Sin imagen',
-      material: 'Material',
-      variante: 'Variante',
-      nenhumComponente: 'No hay componentes registrados',
-      quantidadeTotal: 'Cantidad Total',
-      galeriaImagens: 'Galería de Imágenes',
-      nenhumAnexo: 'Sin adjuntos',
-      anexosTecnicos: 'Adjuntos Técnicos',
-      gestaoAcessoUsuarios: 'Gestión de niveles de acceso de usuarios',
-      gestaoAcessoHint: 'Pantalla exclusiva para administradores para definir el perfil de acceso de cada usuario.',
-      nivelAcesso: 'Nivel de Acceso',
-      empresa: 'Empresa',
-      role_admin: 'Administrador',
-      role_gestor: 'Gestor',
-      role_engenheiro: 'Ingeniero',
-      role_usuario: 'Usuario',
-      role_cliente: 'Cliente',
-      acessoAtualizadoSucesso: 'Nivel de acceso actualizado correctamente.',
-      nenhumaAlteracaoRole: 'No hay cambios para guardar.',
-      salvando: 'Guardando...',
-      naoPodeEditarProprioPerfilHint: 'Por seguridad, el administrador conectado no puede cambiar su propio perfil en esta pantalla.',
-    },
-  },
-};
+export interface Usuario {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  companyId?: string | null;
+  mustChangePassword?: boolean;
+}
 
-i18n.use(LanguageDetector).use(initReactI18next).init({
-  resources,
-  fallbackLng: 'pt',
-  interpolation: {
-    escapeValue: false,
-  },
-});
+export interface Categoria {
+  id: string;
+  namePt: string;
+  nameEn?: string | null;
+  nameEs?: string | null;
+}
 
-export default i18n;
+export interface Material {
+  id: string;
+  code: string;
+  codeWarning?: string | null;
+  namePt: string;
+  nameEn?: string | null;
+  nameEs?: string | null;
+  descriptionPt?: string | null;
+  descriptionEn?: string | null;
+  descriptionEs?: string | null;
+  categoryId: string;
+  category?: Categoria;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VarianteMaterial {
+  id: string;
+  materialId: string;
+  code: string;
+  codeWarning?: string | null;
+  namePt: string;
+  nameEn?: string | null;
+  nameEs?: string | null;
+  unit?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Projeto {
+  id: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  status: 'ativo' | 'revisao' | 'encerrado';
+  companyId?: string | null;
+}
+
+export interface Documento {
+  id: string;
+  projectId: string;
+  code: string;
+  title: string;
+  type: 'lista_materiais' | 'lista_estimativa' | 'lista_cabos';
+  revision: string;
+  project?: Projeto;
+  items?: ItemDocumento[];
+}
+
+export interface DetalheTypico {
+  id: string;
+  code: string;
+  namePt: string;
+  nameEn?: string | null;
+  nameEs?: string | null;
+  descriptionPt?: string | null;
+  descriptionEn?: string | null;
+  descriptionEs?: string | null;
+  components?: ComponenteTypico[];
+  attachments?: AnexoArquivo[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ComponenteTypico {
+  id: string;
+  typicalDetailId: string;
+  variantId: string;
+  variant?: VarianteMaterial & { material?: Material };
+  quantity: number;
+  lineNumber: number;
+}
+
+export interface ItemDocumento {
+  id: string;
+  documentId: string;
+  variantId: string;
+  variant?: VarianteMaterial & { material?: Material };
+  quantity: number;
+  unitPrice?: number | null;
+  totalPrice?: number | null;
+  lineNumber: number;
+}
+
+export interface AnexoArquivo {
+  id: string;
+  entityType: string;
+  entityId: string;
+  fileType: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  language?: string | null;
+  description?: string | null;
+  isMainImage: boolean;
+}
