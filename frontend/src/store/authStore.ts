@@ -8,6 +8,7 @@ interface AuthState {
   carregando: boolean;
   login: (email: string, password: string) => Promise<void>;
   carregarPerfil: () => Promise<void>;
+  alterarSenha: (senhaAtual: string, novaSenha: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -41,6 +42,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (_erro) {
       localStorage.removeItem('mm_token');
       set({ token: null, usuario: null });
+    }
+  },
+
+  alterarSenha: async (senhaAtual, novaSenha) => {
+    await api.put('/auth/change-password', { senhaAtual, novaSenha });
+    const usuarioAtual = get().usuario;
+    if (usuarioAtual) {
+      set({ usuario: { ...usuarioAtual, mustChangePassword: false } });
     }
   },
 

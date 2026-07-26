@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../contexts/ToastContext';
+import { usePermissoes } from '../hooks/usePermissoes';
 import type { Documento, Projeto } from '../types';
 import { compararDocumentos, criarDocumento, listarDocumentos, removerDocumento, type BalanceComparisonResponse } from '../services/documentsService';
 import { obterProjeto } from '../services/projectsService';
@@ -13,6 +14,7 @@ const abasDocumento: Documento['type'][] = ['lista_materiais', 'lista_estimativa
 export default function ProjectDocumentsWorkspacePage() {
   const { id: projectId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { podeCriarDocumento, podeExcluirDocumento } = usePermissoes();
   const { t } = useTranslation();
   const { mostrarToast } = useToast();
 
@@ -132,9 +134,11 @@ export default function ProjectDocumentsWorkspacePage() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
           />
-          <button className="mm-btn mm-btn-primary" type="button" onClick={criarNaAbaAtual}>
-            + {t('novoDocumento')}
-          </button>
+          {podeCriarDocumento && (
+            <button className="mm-btn mm-btn-primary" type="button" onClick={criarNaAbaAtual}>
+              + {t('novoDocumento')}
+            </button>
+          )}
         </div>
 
         <div className="mm-card grid gap-2 p-3 md:grid-cols-[180px_1fr_120px_auto]">
@@ -171,9 +175,11 @@ export default function ProjectDocumentsWorkspacePage() {
                       >
                         {t('detalhar')}
                       </button>
-                      <button className="mm-btn text-xs" type="button" onClick={() => excluirDocumento(doc.id)}>
-                        {t('excluir')}
-                      </button>
+                      {podeExcluirDocumento && (
+                        <button className="mm-btn text-xs" type="button" onClick={() => excluirDocumento(doc.id)}>
+                          {t('excluir')}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

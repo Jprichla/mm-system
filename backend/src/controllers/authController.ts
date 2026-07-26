@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/prisma';
 import { gerarHashSenha, compararSenha } from '../utils/password';
 import { gerarToken } from '../utils/jwt';
-import { loginSchema, registerSchema } from '../utils/validators';
+import { loginSchema, registerSchema, changePasswordSchema } from '../utils/validators';
 
 export async function register(req: Request, res: Response): Promise<void> {
   const dados = registerSchema.parse(req.body);
@@ -64,6 +64,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       email: usuario.email,
       role: usuario.role,
       companyId: usuario.companyId,
+      mustChangePassword: usuario.mustChangePassword,
     },
   });
 }
@@ -83,6 +84,7 @@ export async function me(req: Request, res: Response): Promise<void> {
       role: true,
       companyId: true,
       createdAt: true,
+      mustChangePassword: true,
     },
   });
 
@@ -92,4 +94,35 @@ export async function me(req: Request, res: Response): Promise<void> {
   }
 
   res.json({ usuario });
+}
+
+export async function alterarSenha(req: Request, res: Response): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ mensagem: 'Usuário não autenticado.' });
+    return;
+  }
+
+  const dados = changePasswordSchema.parse(req.body);
+
+  const usuario = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!usuario || usuario.deletedAt) {
+    res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+    return;
+  }
+
+  const senhaAtualValida = await compararSenha(dados.senhaAtual, usuario.passwordHash);
+  if (!senhaAtualValida) {
+    res.status(401).json({ mensagem: 'Senha atual incorreta.' });
+    return;
+  }
+
+  await prisma.user.update({
+    where: { id: usuario.id },
+    data: {
+      passwordHash: await gerarHashSenha(dados.novaSenha),
+      mustChangePassword: false,
+    },
+  });
+
+  res.json({ mensagem: 'Senha alterada com sucesso.' });
 }

@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { GenericTable } from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
+import { usePermissoes } from '../hooks/usePermissoes';
 import type { Projeto } from '../types';
 import { listarProjetos, removerProjeto } from '../services/projectsService';
 
 export function ProjectsPage() {
   const { t } = useTranslation();
+  const { podeCriarProjeto, podeEditarProjeto, podeExcluirProjeto } = usePermissoes();
   const navigate = useNavigate();
   const { mostrarToast } = useToast();
 
@@ -55,26 +57,32 @@ export function ProjectsPage() {
             <button className="mm-btn text-xs" onClick={() => navigate(`/projects/${item.id}/documents`)} type="button">
               📁 {t('documentos')}
             </button>
-            <button className="mm-btn text-xs" onClick={() => navigate(`/projects/${item.id}/edit`)} type="button">
-              {t('editar')}
-            </button>
-            <button className="mm-btn text-xs" onClick={() => excluir(item.id)} type="button">
-              {t('excluir')}
-            </button>
+            {podeEditarProjeto && (
+              <button className="mm-btn text-xs" onClick={() => navigate(`/projects/${item.id}/edit`)} type="button">
+                {t('editar')}
+              </button>
+            )}
+            {podeExcluirProjeto && (
+              <button className="mm-btn text-xs" onClick={() => excluir(item.id)} type="button">
+                {t('excluir')}
+              </button>
+            )}
           </div>
         ),
       },
     ],
-    [navigate, t],
+    [navigate, t, podeEditarProjeto, podeExcluirProjeto],
   );
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-semibold">{t('projetos')}</h2>
-        <button className="mm-btn mm-btn-primary" type="button" onClick={() => navigate('/projects/new')}>
-          {t('novoProjeto')}
-        </button>
+        {podeCriarProjeto && (
+          <button className="mm-btn mm-btn-primary" type="button" onClick={() => navigate('/projects/new')}>
+            {t('novoProjeto')}
+          </button>
+        )}
       </div>
 
       <div className="mm-card flex flex-wrap gap-2 p-3">

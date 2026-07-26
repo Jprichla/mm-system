@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../contexts/ToastContext';
 import { api } from '../services/api';
+import { usePermissoes } from '../hooks/usePermissoes';
 import type { Material, VarianteMaterial } from '../types';
 
 interface MaterialDetail extends Material {
@@ -14,6 +15,7 @@ export default function MaterialDetailPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { mostrarToast } = useToast();
+  const { podeEditarMaterial } = usePermissoes();
   const [material, setMaterial] = useState<MaterialDetail | null>(null);
   const [carregando, setCarregando] = useState(true);
 
@@ -58,9 +60,11 @@ export default function MaterialDetailPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link to={`/materials/${material.id}/edit`} className="mm-btn mm-btn-primary">
-              ✏️ {t('editar')}
-            </Link>
+            {podeEditarMaterial && (
+              <Link to={`/materials/${material.id}/edit`} className="mm-btn mm-btn-primary">
+                ✏️ {t('editar')}
+              </Link>
+            )}
             <button onClick={() => navigate('/materials')} className="mm-btn" type="button">
               ← {t('voltar')}
             </button>
@@ -121,9 +125,11 @@ export default function MaterialDetailPage() {
       <section className="mm-card p-4">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">🔧 {t('variantes')} ({material.variants?.length || 0})</h2>
-          <Link to={`/materials/${material.id}/edit`} className="mm-btn mm-btn-primary text-sm">
-            + {t('adicionarVariante')}
-          </Link>
+          {podeEditarMaterial && (
+            <Link to={`/materials/${material.id}/edit`} className="mm-btn mm-btn-primary text-sm">
+              + {t('adicionarVariante')}
+            </Link>
+          )}
         </div>
 
         {material.variants && material.variants.length > 0 ? (

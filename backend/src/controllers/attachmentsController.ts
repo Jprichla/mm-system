@@ -1,8 +1,8 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { FileType } from '@prisma/client';
 import { Request, Response } from 'express';
 import { prisma } from '../config/prisma';
+import { s3Client, R2_BUCKET_NAME, montarChaveArquivo, montarUrlPublica, extrairChaveDaUrl } from '../config/s3';
 
 const mimeToType = (mime: string): FileType => {
   if (mime.startsWith('image/')) return 'imagem';
@@ -46,7 +46,18 @@ export const uploadAnexoDetalhe = async (req: Request, res: Response) => {
       return res.status(400).json({ erro: 'Arquivo não enviado' });
     }
 
-    const filePath = `/uploads/${req.file.filename}`;
+    const chave = montarChaveArquivo('typical-details', String(typicalDetailId), req.file.originalname);
+
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: chave,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      })
+    );
+
+    const filePath = montarUrlPublica(chave);
     const language = req.body.language ? String(req.body.language) : null;
     const description = req.body.description ? String(req.body.description) : null;
     const isMainImage = req.body.isMainImage === 'true';
@@ -133,8 +144,12 @@ export const removerAnexo = async (req: Request, res: Response) => {
       where: { id: String(attachmentId) },
     });
 
-    const absolutePath = path.resolve(process.cwd(), anexo.filePath.replace(/^\//, ''));
-    await fs.unlink(absolutePath).catch(() => null);
+    const chave = extrairChaveDaUrl(anexo.filePath);
+    if (chave) {
+      await s3Client
+        .send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: chave }))
+        .catch((erro) => console.error('Erro ao remover objeto no R2:', erro));
+    }
 
     res.status(204).send();
   } catch (erro) {

@@ -34,6 +34,8 @@ export const compararDocumentos = async (req: Request, res: Response) => {
       return res.status(404).json({ erro: 'Um ou mais documentos não foram encontrados' });
     }
 
+    type DocumentoComItens = (typeof documentos)[number];
+
     const indexByVariant = new Map<
       string,
       {
@@ -67,7 +69,7 @@ export const compararDocumentos = async (req: Request, res: Response) => {
     }
 
     const rows = Array.from(indexByVariant.values()).map((row) => {
-      const quantities = documentos.map((doc) => row.quantitiesByDocument[doc.id] ?? 0);
+      const quantities = documentos.map((doc: DocumentoComItens) => row.quantitiesByDocument[doc.id] ?? 0);
       const max = Math.max(...quantities);
       const min = Math.min(...quantities);
       const spread = max - min;
@@ -75,7 +77,7 @@ export const compararDocumentos = async (req: Request, res: Response) => {
       return {
         ...row,
         quantitiesByDocument: Object.fromEntries(
-          documentos.map((doc) => [doc.id, row.quantitiesByDocument[doc.id] ?? 0])
+          documentos.map((doc: DocumentoComItens) => [doc.id, row.quantitiesByDocument[doc.id] ?? 0])
         ),
         spread,
       };
@@ -84,7 +86,7 @@ export const compararDocumentos = async (req: Request, res: Response) => {
     rows.sort((a, b) => b.spread - a.spread);
 
     res.json({
-      documentos: documentos.map((doc) => ({
+      documentos: documentos.map((doc: DocumentoComItens) => ({
         id: doc.id,
         code: doc.code,
         title: doc.title,

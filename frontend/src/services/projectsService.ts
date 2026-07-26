@@ -41,3 +41,33 @@ export async function removerProjeto(id: string) {
   const resposta = await api.delete(`/projects/${id}`);
   return resposta.data;
 }
+
+export interface MembroProjeto {
+  id: string;
+  userId: string;
+  projectId: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+}
+
+export async function listarMembrosProjeto(projectId: string) {
+  const resposta = await api.get<{ dados: MembroProjeto[] }>(`/projects/${projectId}/members`);
+  return resposta.data.dados;
+}
+
+export async function adicionarMembroProjeto(projectId: string, userId: string) {
+  const resposta = await api.post<{ mensagem: string; dados: MembroProjeto }>(`/projects/${projectId}/members`, {
+    userId,
+  });
+  return resposta.data;
+}
+
+export async function removerMembroProjeto(projectId: string, userId: string) {
+  const resposta = await api.delete<{ mensagem: string }>(`/projects/${projectId}/members/${userId}`);
+  return resposta.data;
+}

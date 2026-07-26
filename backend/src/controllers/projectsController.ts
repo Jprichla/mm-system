@@ -10,8 +10,9 @@ export async function listarProjetos(req: Request, res: Response): Promise<void>
 
   const where: Prisma.ProjectWhereInput = {
     deletedAt: null,
-    ...(req.user?.role === 'cliente' ? { companyId: req.user.companyId ?? '__SEM_EMPRESA__' } : {}),
-    ...(req.user?.role === 'usuario' ? { createdById: req.user.id } : {}),
+    ...(req.user?.role === 'cliente' || req.user?.role === 'usuario'
+      ? { members: { some: { userId: req.user.id } } }
+      : {}),
     ...(search
       ? {
           OR: [
@@ -51,14 +52,16 @@ export async function detalharProjeto(req: Request, res: Response): Promise<void
     return;
   }
 
-  if (req.user?.role === 'cliente' && projeto.companyId !== req.user.companyId) {
-    res.status(403).json({ mensagem: 'Acesso negado ao projeto solicitado.' });
-    return;
-  }
+  if (req.user?.role === 'cliente' || req.user?.role === 'usuario') {
+    const ehMembro = await prisma.projectMember.findFirst({
+      where: { projectId: id, userId: req.user.id },
+      select: { id: true },
+    });
 
-  if (req.user?.role === 'usuario' && projeto.createdById !== req.user.id) {
-    res.status(403).json({ mensagem: 'Acesso negado ao projeto solicitado.' });
-    return;
+    if (!ehMembro) {
+      res.status(403).json({ mensagem: 'Acesso negado ao projeto solicitado.' });
+      return;
+    }
   }
 
   res.json({ dados: projeto });
@@ -74,6 +77,13 @@ export async function criarProjeto(req: Request, res: Response): Promise<void> {
     },
   });
 
+  // Quem cria o projeto já vira membro automaticamente
+  if (req.user?.id) {
+    await prisma.projectMember.create({
+      data: { projectId: projeto.id, userId: req.user.id },
+    }).catch(() => null);
+  }
+
   res.status(201).json({ mensagem: 'Projeto criado com sucesso.', dados: projeto });
 }
 
@@ -84,11 +94,6 @@ export async function atualizarProjeto(req: Request, res: Response): Promise<voi
   const projetoAtual = await prisma.project.findUnique({ where: { id } });
   if (!projetoAtual || projetoAtual.deletedAt) {
     res.status(404).json({ mensagem: 'Projeto não encontrado.' });
-    return;
-  }
-
-  if (req.user?.role === 'cliente' && projetoAtual.companyId !== req.user.companyId) {
-    res.status(403).json({ mensagem: 'Acesso negado para atualizar este projeto.' });
     return;
   }
 
@@ -109,11 +114,82 @@ export async function removerProjeto(req: Request, res: Response): Promise<void>
     return;
   }
 
-  if (req.user?.role === 'cliente' && projetoAtual.companyId !== req.user.companyId) {
-    res.status(403).json({ mensagem: 'Acesso negado para excluir este projeto.' });
+  await prisma.project.update({ where: { id }, data: { deletedAt: new Date() } });
+  res.json({ mensagem: 'Projeto removido (soft delete) com sucesso.' });
+}
+
+export async function listarMembrosProjeto(req: Request, res: Response): Promise<void> {
+  const projectId = String(req.params.id);
+
+  const projeto = await prisma.project.findFirst({ where: { id: projectId, deletedAt: null } });
+  if (!projeto) {
+    res.status(404).json({ mensagem: 'Projeto não encontrado.' });
     return;
   }
 
-  await prisma.project.update({ where: { id }, data: { deletedAt: new Date() } });
-  res.json({ mensagem: 'Projeto removido (soft delete) com sucesso.' });
+  const membros = await prisma.projectMember.findMany({
+    where: { projectId },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true, role: true, deletedAt: true },
+      },
+    },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  res.json({ dados: membros.filter((m: (typeof membros)[number]) => !m.user.deletedAt) });
+}
+
+export async function adicionarMembroProjeto(req: Request, res: Response): Promise<void> {
+  const projectId = String(req.params.id);
+  const { userId } = req.body as { userId?: string };
+
+  if (!userId) {
+    res.status(400).json({ mensagem: 'Informe o usuário a ser adicionado.' });
+    return;
+  }
+
+  const [projeto, usuario] = await Promise.all([
+    prisma.project.findFirst({ where: { id: projectId, deletedAt: null } }),
+    prisma.user.findFirst({ where: { id: userId, deletedAt: null } }),
+  ]);
+
+  if (!projeto) {
+    res.status(404).json({ mensagem: 'Projeto não encontrado.' });
+    return;
+  }
+
+  if (!usuario) {
+    res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+    return;
+  }
+
+  const jaMembro = await prisma.projectMember.findFirst({ where: { projectId, userId } });
+  if (jaMembro) {
+    res.status(400).json({ mensagem: 'Usuário já está vinculado a este projeto.' });
+    return;
+  }
+
+  const membro = await prisma.projectMember.create({
+    data: { projectId, userId },
+    include: {
+      user: { select: { id: true, name: true, email: true, role: true } },
+    },
+  });
+
+  res.status(201).json({ mensagem: 'Usuário adicionado ao projeto com sucesso.', dados: membro });
+}
+
+export async function removerMembroProjeto(req: Request, res: Response): Promise<void> {
+  const projectId = String(req.params.id);
+  const userId = String(req.params.userId);
+
+  const membro = await prisma.projectMember.findFirst({ where: { projectId, userId } });
+  if (!membro) {
+    res.status(404).json({ mensagem: 'Vínculo não encontrado.' });
+    return;
+  }
+
+  await prisma.projectMember.delete({ where: { id: membro.id } });
+  res.json({ mensagem: 'Usuário removido do projeto com sucesso.' });
 }

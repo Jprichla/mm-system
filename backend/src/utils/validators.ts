@@ -14,6 +14,11 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Senha é obrigatória.'),
 });
 
+export const changePasswordSchema = z.object({
+  senhaAtual: z.string().min(1, 'Informe a senha atual.'),
+  novaSenha: z.string().min(6, 'A nova senha deve ter ao menos 6 caracteres.'),
+});
+
 export const updateUserAccessSchema = z.object({
   role: z.nativeEnum(Role),
   companyId: z.string().uuid('companyId inválido.').optional().nullable(),

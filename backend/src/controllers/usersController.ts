@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Prisma, Role } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { updateUserAccessSchema } from '../utils/validators';
+import { gerarHashSenha, gerarSenhaTemporaria } from '../utils/password';
 
 export async function listarUsuarios(req: Request, res: Response): Promise<void> {
   const page = Number(req.query.page ?? 1);
@@ -114,4 +115,113 @@ export async function atualizarAcessoUsuario(req: Request, res: Response): Promi
   });
 
   res.json({ mensagem: 'Nível de acesso atualizado com sucesso.', usuario: atualizado });
+}
+
+export async function criarUsuario(req: Request, res: Response): Promise<void> {
+  const { name, email, role } = req.body;
+
+  if (!name || !email || !role) {
+    res.status(400).json({ mensagem: 'Nome, email e nível de acesso são obrigatórios.' });
+    return;
+  }
+
+  const emailExistente = await prisma.user.findFirst({ where: { email, deletedAt: null } });
+  if (emailExistente) {
+    res.status(400).json({ mensagem: 'Já existe um usuário com este e-mail.' });
+    return;
+  }
+
+  const senhaTemporaria = gerarSenhaTemporaria();
+  const senhaHash = await gerarHashSenha(senhaTemporaria);
+
+  const usuario = await prisma.user.create({
+    data: {
+      name,
+      email,
+      passwordHash: senhaHash,
+      role: role as Role,
+      mustChangePassword: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  res.status(201).json({ mensagem: 'Usuário criado com sucesso.', usuario, senhaTemporaria });
+}
+
+export async function excluirUsuario(req: Request, res: Response): Promise<void> {
+  const id = String(req.params.id);
+  const usuarioLogado = req.user;
+
+  if (!usuarioLogado) {
+    res.status(401).json({ mensagem: 'Usuário não autenticado.' });
+    return;
+  }
+
+  if (usuarioLogado.id === id) {
+    res.status(400).json({ mensagem: 'Não é permitido excluir o próprio usuário.' });
+    return;
+  }
+
+  const usuarioExistente = await prisma.user.findFirst({
+    where: { id, deletedAt: null },
+    select: { id: true, role: true },
+  });
+
+  if (!usuarioExistente) {
+    res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+    return;
+  }
+
+  if (usuarioExistente.role === 'admin') {
+    const totalAdminsAtivos = await prisma.user.count({
+      where: { role: Role.admin, deletedAt: null },
+    });
+
+    if (totalAdminsAtivos <= 1) {
+      res.status(400).json({ mensagem: 'Deve existir ao menos 1 administrador ativo no sistema.' });
+      return;
+    }
+  }
+
+  await prisma.user.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+
+  res.json({ mensagem: 'Usuário excluído com sucesso.' });
+}
+
+export async function resetarSenhaUsuario(req: Request, res: Response): Promise<void> {
+  const id = String(req.params.id);
+
+  const usuarioExistente = await prisma.user.findFirst({
+    where: { id, deletedAt: null },
+    select: { id: true },
+  });
+
+  if (!usuarioExistente) {
+    res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+    return;
+  }
+
+  const senhaTemporaria = gerarSenhaTemporaria();
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      passwordHash: await gerarHashSenha(senhaTemporaria),
+      mustChangePassword: true,
+    },
+  });
+
+  res.json({
+    mensagem: 'Senha resetada com sucesso. Repasse a senha temporária abaixo ao usuário.',
+    senhaTemporaria,
+  });
 }

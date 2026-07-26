@@ -6,6 +6,7 @@ export interface Usuario {
   email: string;
   role: Role;
   companyId?: string | null;
+  mustChangePassword?: boolean;
 }
 
 export interface Categoria {
