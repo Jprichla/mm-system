@@ -141,6 +141,26 @@ describe('role preview controls', () => {
     expect(screen.getByLabelText('Idioma').parentElement).toHaveClass('flex-wrap');
   });
 
+  it('gives native role options a readable surface instead of inheriting header colors', () => {
+    const stylesheet = document.createElement('style');
+    stylesheet.textContent = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
+    document.head.append(stylesheet);
+
+    try {
+      const optionRule = Array.from(stylesheet.sheet!.cssRules).find(
+        (rule) =>
+          rule instanceof CSSStyleRule &&
+          rule.selectorText === '.mm-header .mm-role-preview-control select option',
+      ) as CSSStyleRule | undefined;
+
+      expect(optionRule).toBeDefined();
+      expect(optionRule?.style.getPropertyValue('background-color')).toBe('var(--bg-elevated)');
+      expect(optionRule?.style.getPropertyValue('color')).toBe('var(--text-primary)');
+    } finally {
+      stylesheet.remove();
+    }
+  });
+
   it('selecting Engineer updates the visual role and selected option', async () => {
     const user = userEvent.setup();
     renderHeader();
