@@ -25,6 +25,8 @@ const formInicial = {
   descriptionEs: '',
 };
 
+type AbaIdioma = 'pt' | 'en' | 'es';
+
 export default function TypicalDetailFormPage() {
   const { id } = useParams();
   const edicao = Boolean(id);
@@ -33,6 +35,8 @@ export default function TypicalDetailFormPage() {
   const { mostrarToast } = useToast();
 
   const [form, setForm] = useState(formInicial);
+  const [aba, setAba] = useState<AbaIdioma>('pt');
+  const tabRefs = useRef<Record<AbaIdioma, HTMLButtonElement | null>>({ pt: null, en: null, es: null });
   const [componentes, setComponentes] = useState<ComponenteTypico[]>([]);
   const [anexos, setAnexos] = useState<AnexoArquivo[]>([]);
   const [variantes, setVariantes] = useState<VarianteMaterial[]>([]);
@@ -143,10 +147,26 @@ export default function TypicalDetailFormPage() {
     [variantes]
   );
 
+  const idiomas: AbaIdioma[] = ['pt', 'en', 'es'];
+  const navegarAbas = (evento: React.KeyboardEvent<HTMLButtonElement>, atual: AbaIdioma) => {
+    const indiceAtual = idiomas.indexOf(atual);
+    const proximoIndice = evento.key === 'ArrowRight' ? (indiceAtual + 1) % idiomas.length
+      : evento.key === 'ArrowLeft' ? (indiceAtual - 1 + idiomas.length) % idiomas.length
+        : evento.key === 'Home' ? 0 : evento.key === 'End' ? idiomas.length - 1 : -1;
+    if (proximoIndice < 0) return;
+    evento.preventDefault();
+    const proximaAba = idiomas[proximoIndice];
+    setAba(proximaAba);
+    tabRefs.current[proximaAba]?.focus();
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{edicao ? t('editarDetalheTypico') : t('novoDetalheTypico')}</h2>
+    <div className="space-y-5">
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{edicao ? t('editarDetalheTypico') : t('novoDetalheTypico')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('codigo')} e {t('componentes')}</p>
+        </div>
         <div className="flex gap-2">
           {edicao && id && (
             <button className="mm-btn" type="button" onClick={() => navigate(`/typical-details/${id}/detail`)}>
@@ -158,20 +178,25 @@ export default function TypicalDetailFormPage() {
         </div>
       </div>
 
-      <div className="mm-card grid gap-3 p-4 md:grid-cols-2">
-        <input className="mm-input" placeholder={t('codigo')} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
-        <input className="mm-input" placeholder={t('nomePt')} value={form.namePt} onChange={(e) => setForm({ ...form, namePt: e.target.value })} />
-        <input className="mm-input" placeholder={t('nomeEn')} value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} />
-        <input className="mm-input" placeholder={t('nomeEs')} value={form.nameEs} onChange={(e) => setForm({ ...form, nameEs: e.target.value })} />
-        <textarea className="mm-input md:col-span-2" placeholder={t('descricaoPt')} value={form.descriptionPt} onChange={(e) => setForm({ ...form, descriptionPt: e.target.value })} />
-        <textarea className="mm-input md:col-span-2" placeholder={t('descricaoEn')} value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} />
-        <textarea className="mm-input md:col-span-2" placeholder={t('descricaoEs')} value={form.descriptionEs} onChange={(e) => setForm({ ...form, descriptionEs: e.target.value })} />
-      </div>
+      <section className="mm-card mm-section-card">
+        <h2 className="mm-section-heading">{t('informacoesGerais')}</h2>
+        <label className="mm-field max-w-md"><span>{t('codigo')}</span><input className="mm-input" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></label>
+      </section>
+
+      <section className="mm-card mm-section-card">
+        <div><h2 className="mm-section-heading">{t('nomes')} e {t('descricoes')}</h2><p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('abaPortugues')}, {t('abaIngles')} e {t('abaEspanhol')}</p></div>
+        <div className="mm-tabs" role="tablist" aria-label={t('nomes')}>
+          {idiomas.map((idioma) => <button key={idioma} ref={(elemento) => { tabRefs.current[idioma] = elemento; }} id={`typical-detail-tab-${idioma}`} className="mm-tab" type="button" role="tab" tabIndex={aba === idioma ? 0 : -1} aria-selected={aba === idioma} aria-controls={`typical-detail-panel-${idioma}`} onClick={() => setAba(idioma)} onKeyDown={(evento) => navegarAbas(evento, idioma)}>{idioma === 'pt' ? t('abaPortugues') : idioma === 'en' ? t('abaIngles') : t('abaEspanhol')}</button>)}
+        </div>
+        <div id="typical-detail-panel-pt" role="tabpanel" aria-labelledby="typical-detail-tab-pt" hidden={aba !== 'pt'} className="grid gap-4 md:grid-cols-2"><label className="mm-field"><span>{t('nomePt')}</span><input className="mm-input" value={form.namePt} onChange={(e) => setForm({ ...form, namePt: e.target.value })} /></label><label className="mm-field"><span>{t('descricaoPt')}</span><textarea className="mm-input" value={form.descriptionPt} onChange={(e) => setForm({ ...form, descriptionPt: e.target.value })} /></label></div>
+        <div id="typical-detail-panel-en" role="tabpanel" aria-labelledby="typical-detail-tab-en" hidden={aba !== 'en'} className="grid gap-4 md:grid-cols-2"><label className="mm-field"><span>{t('nomeEn')}</span><input className="mm-input" value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} /></label><label className="mm-field"><span>{t('descricaoEn')}</span><textarea className="mm-input" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} /></label></div>
+        <div id="typical-detail-panel-es" role="tabpanel" aria-labelledby="typical-detail-tab-es" hidden={aba !== 'es'} className="grid gap-4 md:grid-cols-2"><label className="mm-field"><span>{t('nomeEs')}</span><input className="mm-input" value={form.nameEs} onChange={(e) => setForm({ ...form, nameEs: e.target.value })} /></label><label className="mm-field"><span>{t('descricaoEs')}</span><textarea className="mm-input" value={form.descriptionEs} onChange={(e) => setForm({ ...form, descriptionEs: e.target.value })} /></label></div>
+      </section>
 
       {edicao && id && (
         <>
-          <div className="mm-card space-y-3 p-4">
-            <h3 className="text-lg font-semibold">{t('componentes')}</h3>
+          <section className="mm-card mm-section-card">
+            <h2 className="mm-section-heading">BOM — {t('componentes')}</h2>
             <div className="grid gap-2 md:grid-cols-[1fr_120px_auto]">
               <select className="mm-input" value={variantId} onChange={(e) => setVariantId(e.target.value)}>
                 <option value="">{t('selecionarVariante')}</option>
@@ -218,10 +243,10 @@ export default function TypicalDetailFormPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
 
-          <div className="mm-card space-y-3 p-4">
-            <h3 className="text-lg font-semibold">{t('anexos')}</h3>
+          <section className="mm-card mm-section-card">
+            <h2 className="mm-section-heading">{t('anexos')}</h2>
             <div className="flex flex-wrap items-center gap-2">
               <input
                 ref={anexoInputRef}
@@ -261,9 +286,9 @@ export default function TypicalDetailFormPage() {
                 ⬆️ {t('uploadArquivo')}
               </button>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {anexos.map((a) => (
-                <div key={a.id} className="rounded border p-2" style={{ borderColor: 'var(--border)' }}>
+                <div key={a.id} className="rounded-[var(--radius-sm)] border p-3" style={{ borderColor: 'var(--border)' }}>
                   {a.mimeType.startsWith('image/') ? (
                     <img src={a.filePath} alt={a.fileName} className="h-32 w-full rounded object-cover" />
                   ) : (
@@ -288,7 +313,7 @@ export default function TypicalDetailFormPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         </>
       )}
     </div>

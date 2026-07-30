@@ -43,64 +43,60 @@ export function ChangePasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <form className="mm-card w-full max-w-md space-y-4 p-6" onSubmit={onSubmit}>
-        <div>
-          <h1 className="text-xl font-semibold">{t('trocarSenha')}</h1>
+    <main className="mm-auth-shell">
+      <div className="mm-auth-layout">
+        <section className="mm-auth-brand" aria-labelledby="password-brand-title">
+          <span className="mm-auth-mark" aria-hidden="true">MM</span>
+          <p className="mm-auth-eyebrow">MM System</p>
+          <h1 id="password-brand-title">{t('appName')}</h1>
+          <p>{t('navegacaoRapida')}</p>
+        </section>
+
+        <form className="mm-auth-card" onSubmit={onSubmit}>
+          <div>
+            <p className="mm-auth-eyebrow">{t('appName')}</p>
+            <h2>{t('trocarSenha')}</h2>
+            <p className="mm-auth-copy">{t('trocaSenhaObrigatoriaHint')}</p>
+          </div>
           {usuario?.mustChangePassword && (
-            <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+            <p className="mm-auth-notice">
               {t('trocaSenhaObrigatoriaHint')}
             </p>
           )}
-        </div>
 
-        <div>
-          <label className="mb-1 block text-sm">{t('senhaAtual')}</label>
-          <input
-            className="mm-input"
-            type="password"
-            required
-            value={senhaAtual}
-            onChange={(e) => setSenhaAtual(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm">{t('novaSenha')}</label>
-          <input
-            className="mm-input"
-            type="password"
-            required
-            minLength={6}
-            value={novaSenha}
-            onChange={(e) => setNovaSenha(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm">{t('confirmarSenha')}</label>
-          <input
-            className="mm-input"
-            type="password"
-            required
-            minLength={6}
-            value={confirmarSenha}
-            onChange={(e) => setConfirmarSenha(e.target.value)}
-          />
-        </div>
+          <fieldset className="mm-auth-fields">
+            <legend className="sr-only">{t('trocarSenha')}</legend>
+            <div className="mm-auth-field">
+              <label htmlFor="current-password">{t('senhaAtual')}</label>
+              <input id="current-password" className="mm-input" type="password" autoComplete="current-password" required value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
+            </div>
+            <div className="mm-auth-field">
+              <label htmlFor="new-password">{t('novaSenha')}</label>
+              <input id="new-password" className="mm-input" type="password" autoComplete="new-password" required minLength={6} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} />
+            </div>
+            <div className="mm-auth-field">
+              <label htmlFor="confirm-password">{t('confirmarSenha')}</label>
+              <input id="confirm-password" className="mm-input" type="password" autoComplete="new-password" required minLength={6} value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} />
+            </div>
+          </fieldset>
 
-        <button className="mm-btn mm-btn-primary w-full" type="submit" disabled={enviando}>
-          {enviando ? '...' : t('trocarSenha')}
-        </button>
+          <div className="mm-auth-actions">
+            <button className="mm-btn mm-btn-primary w-full" type="submit" disabled={enviando} aria-busy={enviando}>
+              <span aria-live="polite">{enviando ? t('salvando') : t('trocarSenha')}</span>
+            </button>
 
-        {!usuario?.mustChangePassword && (
-          <button className="mm-btn w-full" type="button" onClick={() => navigate('/home')}>
-            {t('cancelar')}
-          </button>
-        )}
+            {!usuario?.mustChangePassword && (
+              <button className="mm-btn w-full" type="button" onClick={() => navigate('/home')}>
+                {t('cancelar')}
+              </button>
+            )}
 
-        <button className="mm-btn w-full text-xs" type="button" onClick={logout}>
-          {t('sair')}
-        </button>
-      </form>
-    </div>
+            <button className="mm-btn w-full text-xs" type="button" onClick={logout}>
+              {t('sair')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }

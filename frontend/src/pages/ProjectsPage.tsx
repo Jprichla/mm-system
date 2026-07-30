@@ -23,7 +23,7 @@ export function ProjectsPage() {
       const resposta = await listarProjetos({ page, search });
       setDados(resposta.dados);
       setTotalPages(resposta.paginacao.totalPages || 1);
-    } catch (_erro) {
+    } catch {
       mostrarToast('erro', t('erroPadrao'));
     }
   };
@@ -39,7 +39,7 @@ export function ProjectsPage() {
       await removerProjeto(id);
       mostrarToast('sucesso', 'Projeto removido com sucesso.');
       carregar();
-    } catch (_erro) {
+    } catch {
       mostrarToast('erro', t('erroPadrao'));
     }
   };
@@ -75,9 +75,14 @@ export function ProjectsPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">{t('projetos')}</h2>
+    <div className="space-y-5">
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{t('projetos')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            {t('buscar')} {t('projetos').toLowerCase()}
+          </p>
+        </div>
         {podeCriarProjeto && (
           <button className="mm-btn mm-btn-primary" type="button" onClick={() => navigate('/projects/new')}>
             {t('novoProjeto')}
@@ -85,8 +90,14 @@ export function ProjectsPage() {
         )}
       </div>
 
-      <div className="mm-card flex flex-wrap gap-2 p-3">
-        <input className="mm-input max-w-md" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('buscar')}...`} />
+      <div className="mm-toolbar" role="search">
+        <input
+          aria-label={t('buscar')}
+          className="mm-input max-w-md"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={`${t('buscar')}...`}
+        />
         <button className="mm-btn" type="button" onClick={() => { setPage(1); carregar(); }}>
           {t('buscar')}
         </button>
@@ -94,7 +105,7 @@ export function ProjectsPage() {
 
       <GenericTable dados={dados} colunas={colunas} vazioTexto={t('semDados')} />
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
         <span>
           {t('pagina')} {page} {t('de')} {totalPages}
         </span>

@@ -12,16 +12,16 @@ interface GenericTableProps<T> {
 
 export function GenericTable<T extends { id?: string }>({ dados, colunas, vazioTexto }: GenericTableProps<T>) {
   if (!dados.length) {
-    return <div className="mm-card p-4 text-sm opacity-80">{vazioTexto}</div>;
+    return <div className="mm-empty-state">{vazioTexto}</div>;
   }
 
   return (
-    <div className="mm-card overflow-x-auto">
-      <table className="min-w-full border-collapse text-sm">
-        <thead style={{ background: 'var(--header-bg)', color: 'var(--header-text)' }}>
+    <div className="mm-table-shell" role="region" aria-label={colunas.map((coluna) => coluna.titulo).join(', ')} tabIndex={0}>
+      <table className="mm-table min-w-full border-collapse text-sm">
+        <thead>
           <tr>
             {colunas.map((coluna) => (
-              <th key={String(coluna.chave)} className="px-3 py-2 text-left font-semibold">
+              <th key={String(coluna.chave)} scope="col">
                 {coluna.titulo}
               </th>
             ))}
@@ -29,9 +29,9 @@ export function GenericTable<T extends { id?: string }>({ dados, colunas, vazioT
         </thead>
         <tbody>
           {dados.map((item, idx) => (
-            <tr key={(item.id as string | undefined) ?? idx} className="border-b" style={{ borderColor: 'var(--border)' }}>
+            <tr key={(item.id as string | undefined) ?? idx}>
               {colunas.map((coluna) => (
-                <td key={String(coluna.chave)} className="px-3 py-2 align-top">
+                <td key={String(coluna.chave)}>
                   {coluna.render ? coluna.render(item) : String((item as Record<string, unknown>)[coluna.chave as string] ?? '')}
                 </td>
               ))}

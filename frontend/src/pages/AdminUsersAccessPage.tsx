@@ -117,6 +117,7 @@ export default function AdminUsersAccessPage() {
         render: (item: UsuarioAdmin) => (
           <select
             className="mm-input min-w-40"
+            aria-label={`${t('nivelAcesso')}: ${item.name}`}
             value={rolesEditados[item.id] ?? item.role}
             onChange={(e) => setRolesEditados((atual) => ({ ...atual, [item.id]: e.target.value as Role }))}
             disabled={usuarioLogado?.id === item.id}
@@ -133,7 +134,7 @@ export default function AdminUsersAccessPage() {
         chave: 'acoes',
         titulo: t('acoes'),
         render: (item: UsuarioAdmin) => (
-          <div className="flex gap-2">
+          <div className="mm-admin-table-actions">
             <button
               className="mm-btn mm-btn-primary text-xs"
               type="button"
@@ -187,53 +188,58 @@ export default function AdminUsersAccessPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="mm-admin-page">
+      <div className="mm-page-header">
         <div className="space-y-1">
-          <h2 className="text-xl font-semibold">{t('gestaoAcessoUsuarios')}</h2>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          <p className="mm-home-eyebrow">{t('gestaoAcessos')}</p>
+          <h1 className="text-2xl font-semibold">{t('gestaoAcessoUsuarios')}</h1>
+          <p className="text-sm text-[color:var(--text-secondary)]">
             {t('gestaoAcessoHint')}
           </p>
         </div>
-        <button className="mm-btn-primary" type="button" onClick={() => setMostrarForm(!mostrarForm)}>
+        <button className="mm-btn-primary" type="button" onClick={() => setMostrarForm(!mostrarForm)} aria-expanded={mostrarForm}>
           + Novo Usuário
         </button>
       </div>
 
       {mostrarForm && (
-        <div className="mm-card p-4 space-y-3">
-          <h3 className="font-semibold text-base">Novo Usuário</h3>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Nome Completo *</label>
-              <input className="mm-input" placeholder="Nome Completo" value={novoUsuario.name} onChange={(e) => setNovoUsuario({ ...novoUsuario, name: e.target.value })} />
+        <section className="mm-card mm-section-card" aria-labelledby="novo-usuario-title">
+          <div>
+            <p className="mm-home-eyebrow">{t('criar')}</p>
+            <h2 id="novo-usuario-title" className="mm-section-heading">Novo Usuário</h2>
+          </div>
+          <div className="mm-admin-form-grid">
+            <div className="mm-field">
+              <label htmlFor="novo-usuario-nome">Nome Completo *</label>
+              <input id="novo-usuario-nome" className="mm-input" placeholder="Nome Completo" value={novoUsuario.name} onChange={(e) => setNovoUsuario({ ...novoUsuario, name: e.target.value })} />
             </div>
-            <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Email *</label>
-              <input className="mm-input" placeholder="email@empresa.com" type="email" value={novoUsuario.email} onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })} />
+            <div className="mm-field">
+              <label htmlFor="novo-usuario-email">Email *</label>
+              <input id="novo-usuario-email" className="mm-input" placeholder="email@empresa.com" type="email" value={novoUsuario.email} onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })} />
             </div>
-            <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>{t('senhaInicialTemporariaHint')}</label>
+            <div className="mm-admin-password-hint" role="note">
+              {t('senhaInicialTemporariaHint')}
             </div>
-            <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Nível de Acesso</label>
-              <select className="mm-input" value={novoUsuario.role} onChange={(e) => setNovoUsuario({ ...novoUsuario, role: e.target.value as Role })}>
+            <div className="mm-field">
+              <label htmlFor="novo-usuario-role">Nível de Acesso</label>
+              <select id="novo-usuario-role" className="mm-input" value={novoUsuario.role} onChange={(e) => setNovoUsuario({ ...novoUsuario, role: e.target.value as Role })}>
                 {ROLES.map((role) => (<option key={role} value={role}>{t(`role_${role}`)}</option>))}
               </select>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button className="mm-btn-primary" style={{minWidth: '100px'}} type="button" onClick={handleCriarUsuario} disabled={criando}>
+          <div className="mm-modal-actions justify-start">
+            <button className="mm-btn-primary" type="button" onClick={handleCriarUsuario} disabled={criando}>
               {criando ? 'Criando...' : 'Criar'}
             </button>
-            <button className="mm-btn" style={{minWidth: '100px'}} type="button" onClick={() => setMostrarForm(false)}>Cancelar</button>
+            <button className="mm-btn" type="button" onClick={() => setMostrarForm(false)}>Cancelar</button>
           </div>
-        </div>
+        </section>
       )}
 
-      <div className="mm-card flex flex-wrap gap-2 p-3">
+      <section className="mm-toolbar" aria-label={t('buscar')}>
         <input
-          className="mm-input max-w-md"
+          className="mm-input mm-admin-search"
+          aria-label={t('buscar')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={`${t('buscar')}...`}
@@ -248,15 +254,15 @@ export default function AdminUsersAccessPage() {
         >
           {t('buscar')}
         </button>
-      </div>
+      </section>
 
       <GenericTable dados={dados} colunas={colunas} vazioTexto={carregando ? t('carregando') : t('semDados')} />
 
-      <div className="flex items-center justify-between text-sm">
+      <nav className="mm-pagination" aria-label={t('pagina')}>
         <span>
           {t('pagina')} {page} {t('de')} {totalPages}
         </span>
-        <div className="flex gap-2">
+        <div className="mm-modal-actions">
           <button className="mm-btn" type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             {t('anterior')}
           </button>
@@ -264,11 +270,11 @@ export default function AdminUsersAccessPage() {
             {t('proxima')}
           </button>
         </div>
-      </div>
+      </nav>
 
-      <div className="rounded-md border p-3 text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+      <aside className="mm-admin-note" role="note">
         {t('naoPodeEditarProprioPerfilHint')}
-      </div>
+      </aside>
 
       <Modal
         aberto={!!usuarioParaExcluir}
@@ -278,14 +284,13 @@ export default function AdminUsersAccessPage() {
         <p className="mb-4 text-sm">
           {t('confirmarExclusaoUsuarioTexto', { nome: usuarioParaExcluir?.name ?? '' })}
         </p>
-        <div className="flex justify-end gap-2">
+        <div className="mm-modal-actions justify-end">
           <button className="mm-btn" type="button" onClick={() => setUsuarioParaExcluir(null)} disabled={excluindo}>
             {t('cancelar')}
           </button>
           <button
-            className="mm-btn"
+            className="mm-btn-danger"
             type="button"
-            style={{ backgroundColor: 'var(--danger, #dc2626)', color: '#fff', borderColor: 'var(--danger, #dc2626)' }}
             onClick={confirmarExclusao}
             disabled={excluindo}
           >
@@ -302,10 +307,7 @@ export default function AdminUsersAccessPage() {
         <p className="mb-3 text-sm">
           {t('senhaTemporariaGeradaTexto', { nome: senhaTemporariaGerada?.nome ?? '' })}
         </p>
-        <div
-          className="mb-4 flex items-center justify-between rounded-md border px-3 py-2 font-mono text-lg"
-          style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}
-        >
+        <div className="mm-password-code">
           <span>{senhaTemporariaGerada?.senha}</span>
           <button
             className="mm-btn text-xs"

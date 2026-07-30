@@ -10,45 +10,51 @@ export default function DocumentsBalancePage() {
 
   if (!data) {
     return (
-      <div className="space-y-3">
-        <p>{t('nenhumBalanceDisponivel')}</p>
-        <button className="mm-btn" type="button" onClick={() => navigate('/documents')}>{t('voltar')}</button>
+      <div className="space-y-4">
+        <div className="mm-card mm-empty-state">
+          <p>{t('nenhumBalanceDisponivel')}</p>
+        </div>
+        <button className="mm-btn" type="button" onClick={() => navigate('/documents')}>&larr; {t('voltar')}</button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{t('balanceEngine')}</h2>
-        <button className="mm-btn" type="button" onClick={() => navigate('/documents')}>{t('voltar')}</button>
+    <div className="space-y-5">
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{t('balanceEngine')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('compararDocumentos')}</p>
+        </div>
+        <button className="mm-btn" type="button" onClick={() => navigate('/documents')}>&larr; {t('voltar')}</button>
       </div>
 
-      <div className="mm-card p-3 text-sm">
-        {t('divergencias')}: {data.resumo.divergentes} / {data.resumo.totalVariantes}
+      <div className="mm-card mm-total-summary">
+        <span>{t('divergencias')}</span>
+        <strong>{data.resumo.divergentes} / {data.resumo.totalVariantes}</strong>
       </div>
 
-      <div className="mm-card overflow-x-auto">
-        <table className="min-w-full text-sm">
+      <div className="mm-table-shell" tabIndex={0}>
+        <table className="mm-table mm-balance-table text-sm">
           <thead>
             <tr>
-              <th className="px-2 py-2 text-left">{t('codigo')}</th>
-              <th className="px-2 py-2 text-left">{t('nome')}</th>
+              <th className="mm-balance-sticky">{t('codigo')}</th>
+              <th>{t('nome')}</th>
               {data.documentos.map((d) => (
-                <th key={d.id} className="px-2 py-2 text-left">{d.code}</th>
+                <th key={d.id} className="mm-number-cell">{d.code}</th>
               ))}
-              <th className="px-2 py-2 text-left">Spread</th>
+              <th className="mm-number-cell mm-balance-spread">Spread</th>
             </tr>
           </thead>
           <tbody>
             {data.itens.map((row) => (
-              <tr key={row.variantId} className="border-t" style={{ borderColor: 'var(--border)' }}>
-                <td className="px-2 py-2">{row.variantCode}</td>
-                <td className="px-2 py-2">{row.variantNamePt}</td>
+              <tr key={row.variantId}>
+                <td className="mm-balance-sticky">{row.variantCode}</td>
+                <td>{row.variantNamePt}</td>
                 {data.documentos.map((d) => (
-                  <td key={d.id} className="px-2 py-2">{Number(row.quantitiesByDocument[d.id] || 0).toFixed(4)}</td>
+                  <td key={d.id} className="mm-number-cell">{Number(row.quantitiesByDocument[d.id] || 0).toFixed(4)}</td>
                 ))}
-                <td className="px-2 py-2 font-semibold">{row.spread.toFixed(4)}</td>
+                <td className="mm-number-cell mm-balance-spread font-semibold">{row.spread.toFixed(4)}</td>
               </tr>
             ))}
           </tbody>

@@ -6,9 +6,15 @@ export default function DocumentsPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-4">
-      <div className="mm-card p-6">
-        <h2 className="mb-2 text-xl font-semibold">{t('documentosProjeto')}</h2>
+    <div className="space-y-5">
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{t('documentosProjeto')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('documentosDentroProjetoHint')}</p>
+        </div>
+      </div>
+      <div className="mm-card mm-section-card">
+        <h2 className="mm-section-heading">{t('documentosProjeto')}</h2>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
           {t('documentosDentroProjetoHint')}
         </p>

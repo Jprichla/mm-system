@@ -43,7 +43,7 @@ export function ProjectFormPage() {
     setCarregandoMembros(true);
     try {
       setMembros(await listarMembrosProjeto(id));
-    } catch (_erro) {
+    } catch {
       mostrarToast('erro', t('erroPadrao'));
     } finally {
       setCarregandoMembros(false);
@@ -61,7 +61,7 @@ export function ProjectFormPage() {
       try {
         const resposta = await listarUsuariosAdmin({ page: 1, search: buscaUsuario });
         setCandidatos(resposta.dados);
-      } catch (_erro) {
+      } catch {
         // busca de candidatos é silenciosa, não trava a tela principal
       }
     }, 300);
@@ -121,58 +121,68 @@ export function ProjectFormPage() {
       }
       mostrarToast('sucesso', t('projetoCriado'));
       navigate('/projects');
-    } catch (_erro) {
+    } catch {
       mostrarToast('erro', t('erroPadrao'));
     }
   };
 
   return (
-    <form className="space-y-4" onSubmit={salvar}>
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{edicao ? `${t('editar')} ${t('projetos')}` : t('novoProjeto')}</h2>
+    <form className="space-y-5" onSubmit={salvar}>
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{edicao ? `${t('editar')} ${t('projetos')}` : t('novoProjeto')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('projetos')}</p>
+        </div>
         <button className="mm-btn" type="button" onClick={() => navigate('/projects')}>
           {t('cancelar')}
         </button>
       </div>
 
-      <section className="mm-card grid gap-3 p-4 md:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm">{t('codigo')}</label>
-          <input className="mm-input" required value={form.code ?? ''} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm">{t('nome')}</label>
-          <input className="mm-input" required value={form.name ?? ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
-        </div>
-        <div className="md:col-span-2">
-          <label className="mb-1 block text-sm">{t('descricao')}</label>
-          <textarea className="mm-input" value={form.description ?? ''} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm">{t('status')}</label>
-          <select className="mm-input" value={form.status ?? 'ativo'} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as Projeto['status'] }))}>
-            <option value="ativo">ativo</option>
-            <option value="revisao">revisao</option>
-            <option value="encerrado">encerrado</option>
-          </select>
+      <section className="mm-card mm-section-card">
+        <h2 className="mm-section-heading">{t('projetos')}</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="mm-field">
+            <span className="mm-field-label">{t('codigo')}</span>
+            <input className="mm-input" required value={form.code ?? ''} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} />
+          </label>
+          <label className="mm-field">
+            <span className="mm-field-label">{t('nome')}</span>
+            <input className="mm-input" required value={form.name ?? ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+          </label>
+          <label className="mm-field md:col-span-2">
+            <span className="mm-field-label">{t('descricao')}</span>
+            <textarea className="mm-input" value={form.description ?? ''} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+          </label>
+          <label className="mm-field">
+            <span className="mm-field-label">{t('status')}</span>
+            <select className="mm-input" value={form.status ?? 'ativo'} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as Projeto['status'] }))}>
+              <option value="ativo">ativo</option>
+              <option value="revisao">revisao</option>
+              <option value="encerrado">encerrado</option>
+            </select>
+          </label>
         </div>
       </section>
 
-      <button className="mm-btn mm-btn-primary" type="submit">
-        {t('salvar')}
-      </button>
+      <div className="flex justify-end">
+        <button className="mm-btn mm-btn-primary" type="submit">
+          {t('salvar')}
+        </button>
+      </div>
 
       {edicao && (
-        <section className="mm-card space-y-3 p-4">
-          <h3 className="text-lg font-semibold">{t('membrosDoProjeto')}</h3>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {t('membrosDoProjetoHint')}
-          </p>
+        <section className="mm-card mm-section-card">
+          <div>
+            <h2 className="mm-section-heading">{t('membrosDoProjeto')}</h2>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {t('membrosDoProjetoHint')}
+            </p>
+          </div>
 
           {podeGerenciarMembrosProjeto && (
             <div className="flex flex-wrap items-end gap-2">
-              <div className="min-w-64 flex-1">
-                <label className="mb-1 block text-sm">{t('buscarUsuario')}</label>
+              <label className="mm-field min-w-64 flex-1">
+                <span className="mm-field-label">{t('buscarUsuario')}</span>
                 <input
                   className="mm-input"
                   placeholder={`${t('buscar')}...`}
@@ -182,9 +192,9 @@ export function ProjectFormPage() {
                     setUsuarioSelecionado('');
                   }}
                 />
-              </div>
-              <div className="min-w-64 flex-1">
-                <label className="mb-1 block text-sm">{t('usuario')}</label>
+              </label>
+              <label className="mm-field min-w-64 flex-1">
+                <span className="mm-field-label">{t('usuario')}</span>
                 <select
                   className="mm-input"
                   value={usuarioSelecionado}
@@ -197,7 +207,7 @@ export function ProjectFormPage() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </label>
               <button
                 className="mm-btn mm-btn-primary"
                 type="button"
@@ -209,7 +219,8 @@ export function ProjectFormPage() {
             </div>
           )}
 
-          <table className="mm-table w-full text-sm">
+          <div className="mm-table-shell" tabIndex={0}>
+            <table className="mm-table w-full text-sm">
             <thead>
               <tr>
                 <th className="px-3 py-2 text-left">{t('nome')}</th>
@@ -247,7 +258,8 @@ export function ProjectFormPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </section>
       )}
     </form>

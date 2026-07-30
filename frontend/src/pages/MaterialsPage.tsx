@@ -107,7 +107,7 @@ export function MaterialsPage() {
         render: (item: Material) => (
           <div className="flex gap-2">
             <button className="mm-btn text-xs" onClick={() => navigate(`/materials/${item.id}/detail`)} type="button">
-              👁️ {t('verDetalhes')}
+              {t('verDetalhes')}
             </button>
             {podeEditarMaterial && (
               <button className="mm-btn text-xs" onClick={() => navigate(`/materials/${item.id}/edit`)} type="button">
@@ -132,9 +132,12 @@ export function MaterialsPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">{t('materiais')}</h2>
+    <div className="space-y-5">
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{t('materiais')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('buscar')} {t('materiais').toLowerCase()}</p>
+        </div>
         {podeCriarMaterial && (
           <button className="mm-btn mm-btn-primary" type="button" onClick={() => navigate('/materials/new')}>
             {t('novoMaterial')}
@@ -142,7 +145,7 @@ export function MaterialsPage() {
         )}
       </div>
 
-      <div className="mm-card flex flex-wrap gap-2 p-3">
+      <div className="mm-toolbar" role="search">
         <input
           className="mm-input max-w-md"
           value={search}
@@ -154,9 +157,9 @@ export function MaterialsPage() {
         </button>
       </div>
 
-      {carregando ? <div className="mm-card p-3">Carregando...</div> : <GenericTable dados={dados} colunas={colunas} vazioTexto={t('semDados')} />}
+      {carregando ? <div className="mm-card p-4">{t('carregando')}...</div> : <GenericTable dados={dados} colunas={colunas} vazioTexto={t('semDados')} />}
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
         <span>
           {t('pagina')} {page} {t('de')} {totalPages}
         </span>
@@ -171,10 +174,10 @@ export function MaterialsPage() {
       </div>
 
       <Modal aberto={!!materialSelecionado} titulo={`${t('variantes')} - ${materialSelecionado?.namePt ?? ''}`} onFechar={() => setMaterialSelecionado(null)}>
-        <div className="mb-3 grid gap-2 md:grid-cols-4">
-          <input className="mm-input" placeholder={t('codigo')} value={codigoVariante} onChange={(e) => setCodigoVariante(e.target.value)} />
-          <input className="mm-input md:col-span-2" placeholder={t('nome')} value={nomeVariante} onChange={(e) => setNomeVariante(e.target.value)} />
-          <input className="mm-input" placeholder={t('unidade')} value={unidadeVariante} onChange={(e) => setUnidadeVariante(e.target.value)} />
+        <div className="mb-3 grid gap-3 md:grid-cols-4">
+          <label className="mm-field"><span className="mm-field-label">{t('codigo')}</span><input className="mm-input" value={codigoVariante} onChange={(e) => setCodigoVariante(e.target.value)} /></label>
+          <label className="mm-field md:col-span-2"><span className="mm-field-label">{t('nome')}</span><input className="mm-input" value={nomeVariante} onChange={(e) => setNomeVariante(e.target.value)} /></label>
+          <label className="mm-field"><span className="mm-field-label">{t('unidade')}</span><input className="mm-input" value={unidadeVariante} onChange={(e) => setUnidadeVariante(e.target.value)} /></label>
         </div>
         <button type="button" className="mm-btn mm-btn-primary mb-3" onClick={incluirVariante}>
           {t('incluirVariante')}

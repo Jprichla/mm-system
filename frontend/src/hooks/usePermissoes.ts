@@ -9,8 +9,8 @@ function temRole(roleUsuario: Role, roleMinimo: Role): boolean {
 }
 
 export function usePermissoes() {
-  const usuario = useAuthStore((s) => s.usuario);
-  const role = usuario?.role ?? 'cliente';
+  const role = useAuthStore((s) => s.roleEfetivo);
+  const isAdminReal = useAuthStore((s) => s.isAdminReal);
 
   return {
     // Usuários
@@ -46,6 +46,7 @@ export function usePermissoes() {
     // Utilitário geral
     role,
     isAdmin: role === 'admin',
+    isAdminReal,
     isGestor: role === 'gestor',
     isEngenheiro: role === 'engenheiro',
     isUsuario: role === 'usuario',

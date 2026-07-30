@@ -3,9 +3,9 @@ import { useAuthStore } from '../store/authStore';
 
 // Permite admin e gestor
 export function GestorRoute() {
-  const usuario = useAuthStore((state) => state.usuario);
+  const roleEfetivo = useAuthStore((state) => state.roleEfetivo);
 
-  if (!usuario || !['admin', 'gestor'].includes(usuario.role)) {
+  if (!['admin', 'gestor'].includes(roleEfetivo)) {
     return <Navigate to="/home" replace />;
   }
 
@@ -14,9 +14,9 @@ export function GestorRoute() {
 
 // Permite admin, gestor e engenheiro
 export function EngenheiroRoute() {
-  const usuario = useAuthStore((state) => state.usuario);
+  const roleEfetivo = useAuthStore((state) => state.roleEfetivo);
 
-  if (!usuario || !['admin', 'gestor', 'engenheiro'].includes(usuario.role)) {
+  if (!['admin', 'gestor', 'engenheiro'].includes(roleEfetivo)) {
     return <Navigate to="/home" replace />;
   }
 

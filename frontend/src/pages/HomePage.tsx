@@ -5,37 +5,45 @@ export function HomePage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4">
-      <section className="mm-card p-6">
-        <h2 className="mb-2 text-2xl font-semibold">{t('painelPrincipal')}</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>{t('navegacaoRapida')}</p>
+    <div className="space-y-6 lg:space-y-8">
+      <section className="mm-home-hero" aria-labelledby="home-title">
+        <div>
+          <p className="mm-home-eyebrow">MM System</p>
+          <h2 id="home-title">{t('painelPrincipal')}</h2>
+          <p>{t('navegacaoRapida')}</p>
+        </div>
+        <span className="mm-home-hero-mark" aria-hidden="true">MM</span>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        <Link className="mm-card p-5 hover:opacity-90" to="/materials">
-          <h3 className="mb-1 text-lg font-semibold">{t('materiais')}</h3>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+      <section aria-label={t('navegacaoRapida')}>
+        <div className="mb-4">
+          <p className="mm-home-eyebrow">{t('navegacaoRapida')}</p>
+          <h3 className="text-xl font-semibold">{t('painelPrincipal')}</h3>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Link className="mm-home-action" to="/materials">
+            <span className="mm-home-action-index" aria-hidden="true">01</span>
+            <h4>{t('materiais')}</h4>
+            <p>
             CRUD completo de material pai e variantes com i18n em 3 idiomas.
-          </p>
-        </Link>
-        <Link className="mm-card p-5 hover:opacity-90" to="/typical-details">
-          <h3 className="mb-1 text-lg font-semibold">{t('detalhesTypicos')}</h3>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Cadastro completo de kits típicos com BOM inline e anexos.
-          </p>
-        </Link>
-        <Link className="mm-card p-5 hover:opacity-90" to="/projects">
-          <h3 className="mb-1 text-lg font-semibold">{t('projetos')}</h3>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Gestão de projetos com filtragem por perfil de acesso.
-          </p>
-        </Link>
-        <Link className="mm-card p-5 hover:opacity-90" to="/projects">
-          <h3 className="mb-1 text-lg font-semibold">{t('documentos')}</h3>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Acesse documentos dentro de cada projeto, com abas por tipo e relatório de balanço.
-          </p>
-        </Link>
+            </p>
+          </Link>
+          <Link className="mm-home-action" to="/typical-details">
+            <span className="mm-home-action-index" aria-hidden="true">02</span>
+            <h4>{t('detalhesTypicos')}</h4>
+            <p>Cadastro completo de kits típicos com BOM inline e anexos.</p>
+          </Link>
+          <Link className="mm-home-action" to="/projects">
+            <span className="mm-home-action-index" aria-hidden="true">03</span>
+            <h4>{t('projetos')}</h4>
+            <p>Gestão de projetos com filtragem por perfil de acesso.</p>
+          </Link>
+          <Link className="mm-home-action" to="/projects">
+            <span className="mm-home-action-index" aria-hidden="true">04</span>
+            <h4>{t('documentos')}</h4>
+            <p>Acesse documentos dentro de cada projeto, com abas por tipo e relatório de balanço.</p>
+          </Link>
+        </div>
       </section>
     </div>
   );

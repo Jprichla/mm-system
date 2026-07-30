@@ -2,9 +2,9 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
 export function AdminOnlyRoute() {
-  const usuario = useAuthStore((state) => state.usuario);
+  const roleEfetivo = useAuthStore((state) => state.roleEfetivo);
 
-  if (usuario?.role !== 'admin') {
+  if (roleEfetivo !== 'admin') {
     return <Navigate to="/home" replace />;
   }
 

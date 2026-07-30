@@ -34,7 +34,7 @@ export default function DocumentDetailPage() {
       setItens(itensDoc);
       const todasVariantes = await Promise.all(materiais.dados.slice(0, 60).map((m) => listarVariantes(m.id).catch(() => [])));
       setVariantes(todasVariantes.flat());
-    } catch (_e) {
+    } catch {
       mostrarToast('erro', t('erroPadrao'));
     }
   };
@@ -61,7 +61,7 @@ export default function DocumentDetailPage() {
       });
       setForm({ variantId: '', quantity: '1', unitPrice: '' });
       setItens(await listarItensDocumento(id));
-    } catch (_e) {
+    } catch {
       mostrarToast('erro', t('erroPadrao'));
     }
   };
@@ -73,60 +73,94 @@ export default function DocumentDetailPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      <div className="mm-page-header">
         <div>
-          <h2 className="text-xl font-semibold">{t('itensDocumento')}</h2>
-          <p className="text-sm opacity-75">{documento?.code} - {documento?.title}</p>
+          <h1 className="text-2xl font-bold">{t('itensDocumento')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{documento?.code} — {documento?.title}</p>
         </div>
-        <button className="mm-btn" type="button" onClick={() => navigate(backTo || (documento?.projectId ? `/projects/${documento.projectId}/documents` : '/projects'))}>{t('voltar')}</button>
+        <button className="mm-btn" type="button" onClick={() => navigate(backTo || (documento?.projectId ? `/projects/${documento.projectId}/documents` : '/projects'))}>
+          &larr; {t('voltar')}
+        </button>
       </div>
 
-      <div className="mm-card grid gap-2 p-3 md:grid-cols-[1fr_120px_120px_auto]">
-        <select className="mm-input" value={form.variantId} onChange={(e) => setForm({ ...form, variantId: e.target.value })}>
-          <option value="">{t('selecionarVariante')}</option>
-          {variantes.map((v) => <option key={v.id} value={v.id}>{v.code} - {v.namePt}</option>)}
-        </select>
-        <input className="mm-input" type="number" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
-        <input className="mm-input" type="number" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} placeholder={t('precoUnitario')} />
-        <button className="mm-btn mm-btn-primary" type="button" onClick={incluirItem} style={{ display: podeEditarItensLista ? undefined : 'none' }}>{t('adicionarItem')}</button>
-      </div>
+      <section className="mm-card mm-section-card">
+        <h2 className="mm-section-heading">{t('documentosProjeto')}</h2>
+        <dl className="mm-metadata-grid">
+          <div><dt>{t('codigo')}</dt><dd>{documento?.code ?? '-'}</dd></div>
+          <div><dt>{t('nome')}</dt><dd>{documento?.title ?? '-'}</dd></div>
+          <div><dt>{t('revisao')}</dt><dd>{documento?.revision ?? '-'}</dd></div>
+        </dl>
+      </section>
 
-      <div className="mm-card overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="px-3 py-2 text-left">#</th>
-              <th className="px-3 py-2 text-left">{t('codigo')}</th>
-              <th className="px-3 py-2 text-left">{t('nome')}</th>
-              <th className="px-3 py-2 text-left">{t('quantidade')}</th>
-              <th className="px-3 py-2 text-left">{t('precoUnitario')}</th>
-              <th className="px-3 py-2 text-left">{t('precoTotal')}</th>
-              <th className="px-3 py-2 text-left">{t('acoes')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {itens.map((item) => (
-              <tr key={item.id} className="border-t" style={{ borderColor: 'var(--border)' }}>
-                <td className="px-3 py-2">{item.lineNumber}</td>
-                <td className="px-3 py-2">{item.variant?.code}</td>
-                <td className="px-3 py-2">{item.variant?.namePt}</td>
-                <td className="px-3 py-2">{item.quantity}</td>
-                <td className="px-3 py-2">{item.unitPrice ?? '-'}</td>
-                <td className="px-3 py-2">{item.totalPrice ?? '-'}</td>
-                <td className="px-3 py-2">{podeEditarItensLista && <button className="mm-btn text-xs" type="button" onClick={() => excluirItem(item.id)}>{t('excluir')}</button>}</td>
+      <section className="mm-card mm-section-card">
+        <div>
+          <h2 className="mm-section-heading">{t('adicionarItem')}</h2>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('itensDocumento')}</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-[1fr_140px_160px_auto]">
+          <label className="mm-field">
+            <span className="mm-field-label">{t('selecionarVariante')}</span>
+            <select className="mm-input" value={form.variantId} onChange={(e) => setForm({ ...form, variantId: e.target.value })}>
+              <option value="">{t('selecionarVariante')}</option>
+              {variantes.map((v) => <option key={v.id} value={v.id}>{v.code} — {v.namePt}</option>)}
+            </select>
+          </label>
+          <label className="mm-field">
+            <span className="mm-field-label">{t('quantidade')}</span>
+            <input className="mm-input" type="number" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
+          </label>
+          <label className="mm-field">
+            <span className="mm-field-label">{t('precoUnitario')}</span>
+            <input className="mm-input" type="number" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: e.target.value })} />
+          </label>
+          {podeEditarItensLista && (
+            <div className="flex items-end">
+              <button className="mm-btn mm-btn-primary w-full" type="button" onClick={incluirItem}>{t('adicionarItem')}</button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="mm-section-heading">{t('itensDocumento')}</h2>
+          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{itens.length} {t('itens')}</span>
+        </div>
+        <div className="mm-table-shell" tabIndex={0}>
+          <table className="mm-table text-sm">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{t('codigo')}</th>
+                <th>{t('nome')}</th>
+                <th className="mm-number-cell">{t('quantidade')}</th>
+                <th className="mm-number-cell">{t('precoUnitario')}</th>
+                <th className="mm-number-cell">{t('precoTotal')}</th>
+                <th>{t('acoes')}</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t" style={{ borderColor: 'var(--border)' }}>
-              <td className="px-3 py-2" colSpan={5}>{t('totalGeral')}</td>
-              <td className="px-3 py-2">{totalDocumento.toFixed(2)}</td>
-              <td />
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {itens.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.lineNumber}</td>
+                  <td>{item.variant?.code}</td>
+                  <td>{item.variant?.namePt}</td>
+                  <td className="mm-number-cell">{item.quantity}</td>
+                  <td className="mm-number-cell">{item.unitPrice ?? '-'}</td>
+                  <td className="mm-number-cell">{item.totalPrice ?? '-'}</td>
+                  <td>{podeEditarItensLista && <button className="mm-btn text-xs" type="button" onClick={() => excluirItem(item.id)}>{t('excluir')}</button>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mm-card mm-total-summary">
+        <span>{t('totalGeral')}</span>
+        <strong>{totalDocumento.toFixed(2)}</strong>
+      </section>
     </div>
   );
 }

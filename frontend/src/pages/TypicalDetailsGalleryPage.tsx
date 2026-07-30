@@ -13,21 +13,24 @@ export default function TypicalDetailsGalleryPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{t('galeriaDetalhesTypicos')}</h2>
+    <div className="space-y-5">
+      <div className="mm-page-header">
+        <div>
+          <h1 className="text-2xl font-bold">{t('galeriaDetalhesTypicos')}</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('detalhesTypicos')}</p>
+        </div>
         <Link to="/typical-details" className="mm-btn">{t('listar')}</Link>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {dados.map((d) => {
           const imagem = d.attachments?.find((a) => a.isMainImage) || d.attachments?.[0];
           return (
-            <Link key={d.id} to={`/typical-details/${d.id}/detail`} className="mm-card overflow-hidden p-0">
-              <div className="h-40 w-full" style={{ background: 'var(--header-bg)' }}>
+            <Link key={d.id} to={`/typical-details/${d.id}/detail`} className="mm-card mm-gallery-card">
+              <div className="mm-gallery-image">
                 {imagem?.mimeType?.startsWith('image/') ? (
                   <img src={imagem.filePath} alt={d.namePt} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-xs opacity-75">SEM IMAGEM</div>
+                  <div className="flex h-full items-center justify-center text-xs" style={{ color: 'var(--header-text)' }}>{t('semImagem')}</div>
                 )}
               </div>
               <div className="space-y-1 p-3 text-sm">
