@@ -1,7 +1,5 @@
 # MM System Frontend Modernization Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Modernize every MM System frontend screen with the approved spacious professional visual language while preserving all existing behavior.
 
 **Architecture:** Establish theme tokens and reusable presentation patterns first, modernize the application shell and shared components second, then migrate page groups without changing their data flow. Verification is performed after each group and again across representative workflows in both themes and responsive widths.

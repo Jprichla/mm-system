@@ -1,7 +1,5 @@
 # Role Preview Header Alignment Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Alinhar o controle desktop “Visualizar como” aos demais controles do cabeçalho sem alterar a apresentação móvel ou o comportamento da simulação.
 
 **Architecture:** O componente existente continuará usando a prop `variant`. A variante desktop receberá uma estrutura horizontal compacta; a variante mobile conservará o rótulo empilhado e o seletor largo dentro da navegação.

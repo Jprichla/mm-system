@@ -1,7 +1,5 @@
 # Admin “Visualizar como” Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Permitir que somente um administrador simule visualmente os perfis Gestor, Engenheiro, Usuário e Cliente sem trocar identidade, token ou autorização no backend.
 
 **Architecture:** O estado de autenticação continuará armazenando a identidade real e ganhará um perfil visual opcional, validado e persistido localmente. Permissões, menus e proteções visuais usarão o perfil efetivo, enquanto verificações de segurança do próprio recurso usarão exclusivamente o perfil real. Um seletor e uma faixa persistente no shell autenticado deixarão a simulação explícita e reversível.
